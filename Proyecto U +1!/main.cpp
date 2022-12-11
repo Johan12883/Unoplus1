@@ -9,14 +9,17 @@
 #include <Windows.h>
 #include <string>
 #include "ingame.h"
+#include "difficulty.h"
 
 int main()
 {
 	//Resolucion para imagenes. default(1280x720)
 	int ancho = 576;
 	int alto = 580;
+
 	int x = -1, y = -1;
 	int seg = 0;
+	int difficulty = 0;
 	// Jugar, Opciones, Salir
 	int btn[] = { 0,0,0 };
 
@@ -38,6 +41,12 @@ int main()
 	//Codigo para cargar imagenes
 	al_init_image_addon();
 	ALLEGRO_BITMAP* menu_null = al_load_bitmap("menu_temp.PNG");
+	ALLEGRO_BITMAP* diffmenu_null = al_load_bitmap("Papaspng.png");
+	ALLEGRO_BITMAP* diffmenu_0 = al_load_bitmap("Papaspng112.png");
+	ALLEGRO_BITMAP* diffmenu_1 = al_load_bitmap("tenkiu.jpg");
+	ALLEGRO_BITMAP* background = al_load_bitmap("fondo_rojo.jpg");
+
+
 
 	ALLEGRO_TIMER* segTimer = al_create_timer(1.0);
 	ALLEGRO_EVENT evento;
@@ -82,7 +91,10 @@ int main()
 				// Click del mouse (& 1 para el boton izquierdo, & 2 para el boton derecho y & 4 para la rueda)
 				if (evento.mouse.button & 1)
 				{
-					printf("x: %d, y: %d\n", x, y); //Aca entrará a la funcion para jugar
+					printf("x: %d, y: %d\n", x, y); 
+					al_clear_to_color(negro);
+					difficulty = diffmenu(evento, queue, diffmenu_null, diffmenu_0, diffmenu_1, diffmenu_0); //Aca entrará a la funcion para jugar
+					game(evento, queue, background, difficulty);
 				}
 				else
 				{
@@ -118,34 +130,36 @@ int main()
 					btn[2] = 0;
 				}
 			}
+		}
 
-			if (x >= 180 && x <= 390 && y >= 220 && y <= 300)
-			{							//Cordenadas (x1,y1) y (x2,y2)
-				al_draw_filled_rectangle(180, 220, 390, 300, blanco); //Aqui ira el menu donde se resaltara el boton "Jugar"
-			}
-			else
-			{							//Cordenadas (x1,y1) y (x2,y2)
-				al_draw_filled_rectangle(180, 220, 390, 300, negro); //Aqui ira el menu "NULL"
 
-			}
-			if (x >= 180 && x <= 390 && y >= 326 && y <= 405)
-			{							//Cordenadas (x1,y1) y (x2,y2)
-				al_draw_filled_rectangle(180, 326, 390, 405, blanco); //Aqui ira el menu donde se resaltara el boton "Opciones"
-			}
-			else
-			{							//Cordenadas (x1,y1) y (x2,y2)
-				al_draw_filled_rectangle(180, 326, 390, 405, negro); //Aqui ira el menu "NULL"
-			}
-			if (x >= 180 && x <= 390 && y >= 432 && y <= 513)
-			{							//Cordenadas (x1,y1) y (x2,y2)
-				al_draw_filled_rectangle(180, 432, 390, 513, blanco); //Aqui ira el menu donde se resaltara el boton "Salir"
-			}
-			else
-			{							//Cordenadas (x1,y1) y (x2,y2)
-				al_draw_filled_rectangle(180, 432, 390, 513, negro); //Aqui ira el menu "NULL"
-			}
+		if (x >= 180 && x <= 390 && y >= 220 && y <= 300)
+		{							//Cordenadas (x1,y1) y (x2,y2)
+			al_draw_filled_rectangle(180, 220, 390, 300, blanco); //Aqui ira el menu donde se resaltara el boton "Jugar"
+		}
+		else
+		{							//Cordenadas (x1,y1) y (x2,y2)
+			al_draw_filled_rectangle(180, 220, 390, 300, negro); //Aqui ira el menu "NULL"
 
 		}
+		if (x >= 180 && x <= 390 && y >= 326 && y <= 405)
+		{							//Cordenadas (x1,y1) y (x2,y2)
+			al_draw_filled_rectangle(180, 326, 390, 405, blanco); //Aqui ira el menu donde se resaltara el boton "Opciones"
+		}
+		else
+		{							//Cordenadas (x1,y1) y (x2,y2)
+			al_draw_filled_rectangle(180, 326, 390, 405, negro); //Aqui ira el menu "NULL"
+		}
+		if (x >= 180 && x <= 390 && y >= 432 && y <= 513)
+		{							//Cordenadas (x1,y1) y (x2,y2)
+			al_draw_filled_rectangle(180, 432, 390, 513, blanco); //Aqui ira el menu donde se resaltara el boton "Salir"
+		}
+		else
+		{							//Cordenadas (x1,y1) y (x2,y2)
+			al_draw_filled_rectangle(180, 432, 390, 513, negro); //Aqui ira el menu "NULL"
+		}
+
+
 		al_flip_display();
 
 	}
