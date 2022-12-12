@@ -14,8 +14,8 @@
 int main()
 {
 	//Resolucion para imagenes. default(1280x720)
-	int ancho = 576;
-	int alto = 580;
+	int ancho = 1280;
+	int alto = 720;
 
 	int x = -1, y = -1;
 	int seg = 0;
