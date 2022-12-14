@@ -31,6 +31,7 @@ int main()
 	int alto_w = GetSystemMetrics(SM_CYSCREEN);
 	ALLEGRO_DISPLAY* main = al_create_display(ancho, alto);
 
+	//Iniciadores de Addons
 	al_install_mouse();
 	al_init_font_addon();
 	al_init_ttf_addon();
@@ -47,15 +48,17 @@ int main()
 	ALLEGRO_BITMAP* background = al_load_bitmap("fondo_rojo.jpg");
 
 
-
+	//Temporizador
 	ALLEGRO_TIMER* segTimer = al_create_timer(1.0);
 	ALLEGRO_EVENT evento;
 	ALLEGRO_EVENT_QUEUE* queue = al_create_event_queue();
 
+	//Eventos
 	al_register_event_source(queue, al_get_timer_event_source(segTimer));
 	al_register_event_source(queue, al_get_mouse_event_source());
 	al_start_timer(segTimer);
 
+	//Addon para figuras primitivasD
 	al_init_primitives_addon();
 	ALLEGRO_COLOR blanco = al_map_rgb(255, 255, 255);
 	ALLEGRO_COLOR negro = al_map_rgb(0, 0, 0);
