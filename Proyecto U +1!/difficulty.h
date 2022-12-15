@@ -15,11 +15,12 @@ int diffmenu(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP* m
 		if (evento.type == ALLEGRO_EVENT_MOUSE_AXES || evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN)
 		{
 			//Posicion del mouse
+			printf("x: %d, y: %d\n", x, y);
 			x = evento.mouse.x;
 			y = evento.mouse.y;
 		}
 
-			if (x >= 56 && x <= 168 && y >= 290 && y <= 402)
+			if (x >= 138 && x <= 480 && y >= 290 && y <= 418)
 			{
 				if (evento.mouse.button & 1)
 				{
@@ -28,7 +29,7 @@ int diffmenu(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP* m
 				}
 			}
 
-			if (x >= 280 && x <= 392 && y >= 290 && y <= 402)
+			if (x >= 522 && x <= 860 && y >= 290 && y <= 420)
 			{
 				if (evento.mouse.button & 1)
 				{
@@ -37,7 +38,7 @@ int diffmenu(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP* m
 				}
 			}
 
-			if (x >= 504 && x <= 576 && y >= 290 && y <= 402)
+			if (x >= 905 && x <= 1245 && y >= 290 && y <= 420)
 			{
 				if (evento.mouse.button & 1)
 				{
@@ -46,28 +47,27 @@ int diffmenu(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP* m
 				}
 			}
 
-
-		if (x >= 56 && x <= 168 && y >= 290 && y <= 402)
+		if (x >= 138 && x <= 480 && y >= 290 && y <= 418)
 		{
-			al_draw_bitmap(menu_0, 56, 290, 0);
+			al_draw_bitmap(menu_0, 0, 0, 0);
 		}
 		else
 		{
 			al_draw_bitmap(menu_null, 0, 0, 0);
 		}
 
-		if (x >= 280 && x <= 392 && y >= 290 && y <= 402)
+		if (x >= 522 && x <= 860 && y >= 290 && y <= 420)
 		{
-			al_draw_bitmap(menu_1, 280, 290, 0);
+			al_draw_bitmap(menu_1, 0, 0, 0);
 		}
 		else
 		{
 			al_draw_bitmap(menu_null, 0, 0, 0);
 		}
 
-		if (x >= 504 && x <= 576 && y >= 290 && y <= 402)
+		if (x >= 905 && x <= 1245 && y >= 290 && y <= 420)
 		{
-			al_draw_bitmap(menu_2, 504, 290, 0);
+			al_draw_bitmap(menu_2, 0, 0, 0);
 		}
 		else
 		{

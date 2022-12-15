@@ -9,7 +9,7 @@
 
 int main();
 int genDeck(int difficulty);
-int gameover(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue);
+int gameover(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, int qcards);
 ALLEGRO_BITMAP* load_cardmid(int color, int numCard);
 int cardOp(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, int numcard1, int color1, int numcard2, int color2, int pobturn);
 int ansOp(int numcard1, int numcard2, int color2, int randOp);
@@ -183,6 +183,7 @@ int game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP* bg, i
 				ansbot1 = 2;
 				ansbot2 = 2;
 				ansbot3 = 2;
+				ans = 1;
 			}
 
 			if (ans == 0)
@@ -196,7 +197,6 @@ int game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP* bg, i
 				if (evento.mouse.button & 1)
 				{
 					turn++;
-					cardflag = 1;
 					printf("A saltado turno!\n");
 				}
 			}
@@ -424,6 +424,7 @@ int game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP* bg, i
 				ans = 2;
 				ansbot2 = 2;
 				ansbot3 = 2;
+				ansbot1 = 1;
 			}
 
 			if (ansbot1 == 0)
@@ -432,7 +433,7 @@ int game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP* bg, i
 				turn++;
 			}
 
-			Sleep(2000);
+			Sleep(500);
 			if (cardflagbot1 == 0)
 			{
 				if (Vdeck[1].color[0] == Vdeck[randPC].color[randNC] || Vdeck[1].numcard[0] == Vdeck[randPC].numcard[randNC])
@@ -601,6 +602,7 @@ int game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP* bg, i
 				ans = 2;
 				ansbot1 = 2;
 				ansbot3 = 2;
+				ansbot2 = 1;
 			}
 
 			if (ansbot2 == 0)
@@ -608,7 +610,7 @@ int game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP* bg, i
 				cardflagbot2 = 1;
 				turn++;
 			}
-			Sleep(2000);
+			Sleep(500);
 			if (cardflagbot2 == 0)
 			{
 				if (Vdeck[2].color[0] == Vdeck[randPC].color[randNC] || Vdeck[2].numcard[0] == Vdeck[randPC].numcard[randNC])
@@ -776,6 +778,8 @@ int game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP* bg, i
 				ans = 2;
 				ansbot1 = 2;
 				ansbot2 = 2;
+				ansbot3 = 1;
+
 			}
 
 			if (ansbot3 == 0)
@@ -784,7 +788,7 @@ int game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP* bg, i
 				turn++;
 			}
 
-			Sleep(2000);
+			Sleep(500);
 			if (cardflagbot3 == 0)
 			{
 				if (Vdeck[3].color[0] == Vdeck[randPC].color[randNC] || Vdeck[3].numcard[0] == Vdeck[randPC].numcard[randNC])
@@ -949,7 +953,7 @@ int game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP* bg, i
 		if (playerDeck.qcard == 0 || Vdeck[1].qcard == 0 || Vdeck[2].qcard == 0 || Vdeck[3].qcard == 0)
 		{
 			int menu;
-			menu = gameover(evento, queue);
+			menu = gameover(evento, queue, playerDeck.qcard);
 			if (menu == 1)
 			{
 				return 1;
@@ -1238,11 +1242,19 @@ int genDeck(int difficulty)
 	return 1;
 }
 
-int gameover(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE *queue)
+int gameover(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE *queue, int qcards)
 {
 	printf("Se a acabado el juego!");
 	int x = -1, y = -1;
 	ALLEGRO_FONT* mine_font = al_load_font("Minecraftia-Regular.ttf", 50, NULL);
+	ALLEGRO_BITMAP* gameover_null_win = al_load_bitmap("Menu_Fin_Juego/Ganar/Menu_Final_Gan_Base.png");
+	ALLEGRO_BITMAP* gameover_play_win = al_load_bitmap("Menu_Fin_Juego/Ganar/Menu_Final_Gan_Jugar.png");
+	ALLEGRO_BITMAP* gameover_menu_win = al_load_bitmap("Menu_Fin_Juego/Ganar/Menu_Final_Gan_Menu.png");
+	ALLEGRO_BITMAP* gameover_null_lose = al_load_bitmap("Menu_Fin_Juego/Perder/Menu_Final_Base_Perd.png");
+	ALLEGRO_BITMAP* gameover_play_lose = al_load_bitmap("Menu_Fin_Juego/Perder/Menu_Final_Perd_Jugar.png");
+	ALLEGRO_BITMAP* gameover_menu_lose = al_load_bitmap("Menu_Fin_Juego/Perder/Menu_Final_Perd_Menu.png");
+
+
 
 	while (true)
 	{
@@ -1254,7 +1266,16 @@ int gameover(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE *queue)
 			x = evento.mouse.x;
 			y = evento.mouse.y;
 		}
-		al_draw_text(mine_font, al_map_rgb(0, 0, 0), 640, 305, ALLEGRO_ALIGN_CENTER, "Menu");
+
+		if (qcards == 0)
+		{
+			al_draw_bitmap(gameover_menu_win, 0, 0, 0);
+
+		}
+		else
+		{
+			al_draw_bitmap(gameover_menu_lose, 0, 0, 0);
+		}
 
 		if (x >= 640 && x <= 804 && y >= 305 && y <= 405)
 		{
@@ -1579,15 +1600,15 @@ int cardOp(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, int numcard1, int c
 		{
 			if (randOp == 0)
 			{
-				al_draw_text(mine_font, al_map_rgb(0, 0, 0), 480, 250, ALLEGRO_ALIGN_CENTER, "+");
+				al_draw_text(mine_font, al_map_rgb(0, 0, 0), 640, 305, ALLEGRO_ALIGN_CENTER, "+");
 			}
 			else if (randOp == 1)
 			{
-				al_draw_text(mine_font, al_map_rgb(0, 0, 0), 480, 250, ALLEGRO_ALIGN_CENTER, "-");
+				al_draw_text(mine_font, al_map_rgb(0, 0, 0), 640, 305, ALLEGRO_ALIGN_CENTER, "-");
 			}
 			else if (randOp == 2)
 			{
-				al_draw_text(mine_font, al_map_rgb(0, 0, 0), 480, 250, ALLEGRO_ALIGN_CENTER, "*");
+				al_draw_text(mine_font, al_map_rgb(0, 0, 0), 640, 305, ALLEGRO_ALIGN_CENTER, "*");
 			}
 		}
 
@@ -1643,13 +1664,13 @@ int cardOp(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, int numcard1, int c
 					if (randAns == 2)
 					{
 						al_draw_text(mine_font, al_map_rgb(0, 0, 0), 640, 405, NULL, "Correcto!");
-						Sleep(1000);
+						Sleep(500);
 						return 1;
 					}
 					else
 					{
 						al_draw_text(mine_font, al_map_rgb(0, 0, 0), 640, 405, NULL, "Incorrecto!");
-						Sleep(1000);
+						Sleep(500);
 						return 0;
 					}
 				}

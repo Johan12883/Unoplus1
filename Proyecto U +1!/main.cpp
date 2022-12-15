@@ -48,10 +48,16 @@ int main()
 
 	//Codigo para cargar imagenes
 	al_init_image_addon();
-	ALLEGRO_BITMAP* menu_null = al_load_bitmap("menu_temp.PNG");
-	ALLEGRO_BITMAP* diffmenu_null = al_load_bitmap("Papaspng.png");
-	ALLEGRO_BITMAP* diffmenu_0 = al_load_bitmap("Papaspng112.png");
-	ALLEGRO_BITMAP* diffmenu_1 = al_load_bitmap("tenkiu.jpg");
+	ALLEGRO_BITMAP* menu_null = al_load_bitmap("Menu_Principal/Menu_Simp.png");
+	ALLEGRO_BITMAP* menu_jugar = al_load_bitmap("Menu_Principal/Menu_Jugar.png");
+	ALLEGRO_BITMAP* menu_inst = al_load_bitmap("Menu_Principal/Menu_Inst.png");
+	ALLEGRO_BITMAP* menu_salir = al_load_bitmap("Menu_Principal/Menu_Salir.png");
+	ALLEGRO_BITMAP* ins_back = al_load_bitmap("Instrucciones/Ins_Volver.png");
+	ALLEGRO_BITMAP* ins_menu = al_load_bitmap("Instrucciones/Ins_Base.png");
+	ALLEGRO_BITMAP* diffmenu_null = al_load_bitmap("Menu_Dificultades/Menu_Dif_Base.png");
+	ALLEGRO_BITMAP* diffmenu_hard = al_load_bitmap("Menu_Dificultades/Menu_Dif_Dificil.png");
+	ALLEGRO_BITMAP* diffmenu_ez = al_load_bitmap("Menu_Dificultades/Menu_Dif_Facil.png");
+	ALLEGRO_BITMAP* diffmenu_normal = al_load_bitmap("Menu_Dificultades/Menu_Dif_Media.png");
 	ALLEGRO_BITMAP* background = al_load_bitmap("fondo_rojo.jpg");
 
 
@@ -87,7 +93,7 @@ int main()
 		//Las capas aqui funcionan en orden ascendente
 		al_draw_bitmap(menu_null, 0, 0, 0);		//Esta es la capa 1, la parte de hasta abajo (esta funcion carga la imagen en la pantalla)
 		al_draw_text(pixel_font, al_map_rgb(0, 0, 0), ancho / 2, 100,
-			ALLEGRO_ALIGN_CENTER, "UNO + 1!");		// Y esta es la capa 2, que esta arriba de la capa 1
+			ALLEGRO_ALIGN_CENTER, "");		// Y esta es la capa 2, que esta arriba de la capa 1
 
 		if (evento.type == ALLEGRO_EVENT_MOUSE_AXES || evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN)
 		{
@@ -97,7 +103,7 @@ int main()
 			printf("x: %d, y: %d\n", x, y);
 
 			//Boton jugar
-			if (x >= 180 && x <= 390 && y >= 220 && y <= 300)
+			if (x >= 425 && x <= 785 && y >= 190 && y <= 320)
 			{
 				btn[0] = 1;
 				// Click del mouse (& 1 para el boton izquierdo, & 2 para el boton derecho y & 4 para la rueda)
@@ -105,7 +111,7 @@ int main()
 				{
 					printf("x: %d, y: %d\n", x, y); 
 					al_clear_to_color(negro);
-					difficulty = diffmenu(evento, queue, diffmenu_null, diffmenu_0, diffmenu_1, diffmenu_0); //Aca entrará a la funcion para jugar
+					difficulty = diffmenu(evento, queue, diffmenu_null, diffmenu_ez,diffmenu_normal,diffmenu_hard); //Aca entrará a la funcion para jugar
 					game(evento, queue, background, difficulty);
 				}
 				else
@@ -115,12 +121,15 @@ int main()
 			}
 
 			//Boton opciones
-			if (x >= 180 && x <= 390 && y >= 326 && y <= 405)
+			if (x >= 413 && x <= 810 && y >= 369 && y <= 500)
 			{
 				btn[1] = 1;
 				if (evento.mouse.button & 1)
 				{
-					printf("x: %d, y: %d\n", x, y); //Aca entrará a la funcion para las opciones
+					if (x>= 0 && x<= 0 && y>= 0 && y <= 0)
+					{
+						printf("");
+					}
 				}
 				else
 				{
@@ -129,13 +138,13 @@ int main()
 			}
 
 			//Boton salir
-			if (x >= 180 && x <= 390 && y >= 432 && y <= 513)
+			if (x >= 444 && x <= 783 && y >= 535 && y <= 665)
 			{
 				btn[2] = 1;
 				if (evento.mouse.button & 1)
 				{
 					printf("x: %d, y: %d\n", x, y); //Aca saldra del juego
-					return 1;
+					exit(0);
 				}
 				else
 				{
@@ -145,30 +154,30 @@ int main()
 		}
 
 
-		if (x >= 180 && x <= 390 && y >= 220 && y <= 300)
+		if (x >= 425 && x <= 785 && y >= 190 && y <= 320)
 		{							//Cordenadas (x1,y1) y (x2,y2)
-			al_draw_filled_rectangle(180, 220, 390, 300, blanco); //Aqui ira el menu donde se resaltara el boton "Jugar"
+			al_draw_bitmap(menu_jugar, 0, 0, 0); //Aqui ira el menu donde se resaltara el boton "Jugar"
 		}
 		else
 		{							//Cordenadas (x1,y1) y (x2,y2)
-			al_draw_filled_rectangle(180, 220, 390, 300, negro); //Aqui ira el menu "NULL"
+			al_draw_bitmap(menu_null, 0, 0, 0); //Aqui ira el menu "NULL"
 
 		}
-		if (x >= 180 && x <= 390 && y >= 326 && y <= 405)
+		if (x >= 413 && x <= 810 && y >= 369 && y <= 500)
 		{							//Cordenadas (x1,y1) y (x2,y2)
-			al_draw_filled_rectangle(180, 326, 390, 405, blanco); //Aqui ira el menu donde se resaltara el boton "Opciones"
+			al_draw_bitmap(menu_inst, 0, 0, 0); //Aqui ira el menu donde se resaltara el boton "Opciones"
 		}
 		else
 		{							//Cordenadas (x1,y1) y (x2,y2)
-			al_draw_filled_rectangle(180, 326, 390, 405, negro); //Aqui ira el menu "NULL"
+			al_draw_bitmap(menu_null, 0, 0, 0); //Aqui ira el menu "NULL"
 		}
-		if (x >= 180 && x <= 390 && y >= 432 && y <= 513)
+		if (x >= 444 && x <= 783 && y >= 535 && y <= 665)
 		{							//Cordenadas (x1,y1) y (x2,y2)
-			al_draw_filled_rectangle(180, 432, 390, 513, blanco); //Aqui ira el menu donde se resaltara el boton "Salir"
+			al_draw_bitmap(menu_salir, 0, 0, 0); //Aqui ira el menu donde se resaltara el boton "Salir"
 		}
 		else
 		{							//Cordenadas (x1,y1) y (x2,y2)
-			al_draw_filled_rectangle(180, 432, 390, 513, negro); //Aqui ira el menu "NULL"
+			al_draw_bitmap(menu_null, 0, 0, 0); //Aqui ira el menu "NULL"
 		}
 
 
