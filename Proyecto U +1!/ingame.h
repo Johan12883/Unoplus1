@@ -7,6 +7,7 @@
 #include <allegro5/allegro5.h>
 #include <allegro5/allegro_image.h>
 
+int main();
 int genDeck(int difficulty);
 int gameover(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue);
 ALLEGRO_BITMAP* load_cardmid(int color, int numCard);
@@ -425,7 +426,7 @@ int game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP* bg, i
 				ansbot3 = 2;
 			}
 
-			if (ans == 0)
+			if (ansbot1 == 0)
 			{
 				cardflagbot1 = 1;
 				turn++;
@@ -594,6 +595,19 @@ int game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP* bg, i
 
 		if (turn == 2)
 		{
+			if (cardStart == 1 && cardflagbot2 == 0 && ansbot2 == 2)
+			{
+				ansbot2 = cardOp(evento, queue, cardmid_aux.numcard[randNC_aux], cardmid_aux.color[randNC_aux], cardmid.numcard[randNC], cardmid.color[randNC], 0);
+				ans = 2;
+				ansbot1 = 2;
+				ansbot3 = 2;
+			}
+
+			if (ansbot2 == 0)
+			{
+				cardflagbot2 = 1;
+				turn++;
+			}
 			Sleep(2000);
 			if (cardflagbot2 == 0)
 			{
@@ -755,6 +769,21 @@ int game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP* bg, i
 
 		if (turn == 3)
 		{
+
+			if (cardStart == 1 && cardflagbot3 == 0 && ansbot3 == 2)
+			{
+				ansbot3 = cardOp(evento, queue, cardmid_aux.numcard[randNC_aux], cardmid_aux.color[randNC_aux], cardmid.numcard[randNC], cardmid.color[randNC], 0);
+				ans = 2;
+				ansbot1 = 2;
+				ansbot2 = 2;
+			}
+
+			if (ansbot3 == 0)
+			{
+				cardflagbot3 = 1;
+				turn++;
+			}
+
 			Sleep(2000);
 			if (cardflagbot3 == 0)
 			{
@@ -919,12 +948,16 @@ int game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP* bg, i
 
 		if (playerDeck.qcard == 0 || Vdeck[1].qcard == 0 || Vdeck[2].qcard == 0 || Vdeck[3].qcard == 0)
 		{
-			gameover(evento, queue);
+			int menu;
+			menu = gameover(evento, queue);
+			if (menu == 1)
+			{
+				return 1;
+			}
 		}
 
 		al_flip_display();
 	}
-	return 1;
 }
 
 
@@ -1209,6 +1242,7 @@ int gameover(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE *queue)
 {
 	printf("Se a acabado el juego!");
 	int x = -1, y = -1;
+	ALLEGRO_FONT* mine_font = al_load_font("Minecraftia-Regular.ttf", 50, NULL);
 
 	while (true)
 	{
@@ -1220,7 +1254,15 @@ int gameover(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE *queue)
 			x = evento.mouse.x;
 			y = evento.mouse.y;
 		}
+		al_draw_text(mine_font, al_map_rgb(0, 0, 0), 640, 305, ALLEGRO_ALIGN_CENTER, "Menu");
 
+		if (x >= 640 && x <= 804 && y >= 305 && y <= 405)
+		{
+			if (evento.mouse.button & 1)
+			{
+				return 1;
+			}
+		}
 		al_flip_display();
 
 	}
@@ -1561,13 +1603,13 @@ int cardOp(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, int numcard1, int c
 				{
 					if (randAns == 0)
 					{
-						al_draw_text(mine_font, al_map_rgb(0, 0, 0), 640, 505, NULL, "Correcto!");
+						al_draw_text(mine_font, al_map_rgb(0, 0, 0), 640, 405, NULL, "Correcto!");
 						Sleep(1000);
 						return 1;
 					}
 					else
 					{
-						al_draw_text(mine_font, al_map_rgb(0, 0, 0), 640, 505, NULL, "Incorrecto!");
+						al_draw_text(mine_font, al_map_rgb(0, 0, 0), 640, 405, NULL, "Incorrecto!");
 						Sleep(1000);
 						return 0;
 					}
@@ -1581,13 +1623,13 @@ int cardOp(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, int numcard1, int c
 				{
 					if (randAns == 1)
 					{
-						al_draw_text(mine_font, al_map_rgb(0, 0, 0), 640, 505, NULL, "Correcto!");
+						al_draw_text(mine_font, al_map_rgb(0, 0, 0), 640, 405, NULL, "Correcto!");
 						Sleep(1000);
 						return 1;
 					}
 					else
 					{
-						al_draw_text(mine_font, al_map_rgb(0, 0, 0), 640, 505, NULL, "Incorrecto!");
+						al_draw_text(mine_font, al_map_rgb(0, 0, 0), 640, 405, NULL, "Incorrecto!");
 						Sleep(1000);
 						return 0;
 					}
@@ -1600,13 +1642,13 @@ int cardOp(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, int numcard1, int c
 				{
 					if (randAns == 2)
 					{
-						al_draw_text(mine_font, al_map_rgb(0, 0, 0), 640, 505, NULL, "Correcto!");
+						al_draw_text(mine_font, al_map_rgb(0, 0, 0), 640, 405, NULL, "Correcto!");
 						Sleep(1000);
 						return 1;
 					}
 					else
 					{
-						al_draw_text(mine_font, al_map_rgb(0, 0, 0), 640, 505, NULL, "Incorrecto!");
+						al_draw_text(mine_font, al_map_rgb(0, 0, 0), 640, 405, NULL, "Incorrecto!");
 						Sleep(1000);
 						return 0;
 					}
