@@ -4,6 +4,7 @@
 #include <allegro5/allegro_ttf.h>
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_primitives.h>
+#include <allegro5/allegro_audio.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <Windows.h>
@@ -33,11 +34,14 @@ int main()
 
 	//Iniciadores de Addons
 	al_install_mouse();
+	al_install_audio();
 	al_init_font_addon();
 	al_init_ttf_addon();
 	ALLEGRO_FONT* pixel_font = al_load_font("pixelmix.ttf", 50, NULL);
 	al_set_window_position(main, ancho_w / 2 - ancho / 2, alto_w / 2 - alto / 2);
 	al_set_window_title(main, "UNO + 1!");
+
+	ALLEGRO_SAMPLE* music = al_load_sample("music.mp3");
 
 	//Codigo para cargar imagenes
 	al_init_image_addon();
@@ -75,6 +79,8 @@ int main()
 				seg++;
 			}
 		}
+
+		al_play_sample(music, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_LOOP, NULL);
 		//Las capas aqui funcionan en orden ascendente
 		al_draw_bitmap(menu_null, 0, 0, 0);		//Esta es la capa 1, la parte de hasta abajo (esta funcion carga la imagen en la pantalla)
 		al_draw_text(pixel_font, al_map_rgb(0, 0, 0), ancho / 2, 100,

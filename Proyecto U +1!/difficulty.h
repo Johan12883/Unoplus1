@@ -17,6 +17,7 @@ int diffmenu(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP* m
 			//Posicion del mouse
 			x = evento.mouse.x;
 			y = evento.mouse.y;
+		}
 
 			if (x >= 56 && x <= 168 && y >= 290 && y <= 402)
 			{
@@ -45,7 +46,6 @@ int diffmenu(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP* m
 				}
 			}
 
-		}
 
 		if (x >= 56 && x <= 168 && y >= 290 && y <= 402)
 		{
