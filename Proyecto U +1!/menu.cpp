@@ -1,37 +1,24 @@
+#include "menu.h"
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_native_dialog.h>
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_ttf.h>
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_primitives.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <Windows.h>
-#include <string>
-#include "menu.h"
-#include "difficulty.h"
-#include "deck.h"
+#include <iostream>
 
-int main()
+
+using std::cout;
+using std::endl;
+
+int menu::initMenu(int ancho, int alto)
 {
-	//Resolucion para imagenes. default(1280x720)
-	int ancho = 1280;
-	int alto = 720;
-
-	int x = -1, y = -1;
-	int seg = 0;
-	int difficulty = 0;
-	// Jugar, Opciones, Salir
-	int btn[] = { 0,0,0 };
-
 	if (!al_init())
 	{
 		al_show_native_message_box(NULL, "ERROR", "ERROR 404", "El programa no pudo cargar correctamente", NULL, ALLEGRO_MESSAGEBOX_ERROR);
 	}
-	int ancho_w = GetSystemMetrics(SM_CXSCREEN);
-	int alto_w = GetSystemMetrics(SM_CYSCREEN);
 	ALLEGRO_DISPLAY* main = al_create_display(ancho, alto);
-
 	al_install_mouse();
 	al_init_font_addon();
 	al_init_ttf_addon();
@@ -83,8 +70,7 @@ int main()
 			//Posicion del mouse
 			x = evento.mouse.x;
 			y = evento.mouse.y;
-			printf("x: %d, y: %d\n", x, y);
-
+			cout << "x: " << x << "y: " << y << endl;
 			//Boton jugar
 			if (x >= 180 && x <= 390 && y >= 220 && y <= 300)
 			{
@@ -92,7 +78,7 @@ int main()
 				// Click del mouse (& 1 para el boton izquierdo, & 2 para el boton derecho y & 4 para la rueda)
 				if (evento.mouse.button & 1)
 				{
-					printf("x: %d, y: %d\n", x, y); 
+					cout << "x: " << x << "y: " << y << endl;
 					al_clear_to_color(negro);
 					difficulty = diffmenu(evento, queue, diffmenu_null, diffmenu_0, diffmenu_1, diffmenu_0); //Aca entrará a la funcion para jugar
 					game(evento, queue, background, difficulty);
@@ -109,7 +95,8 @@ int main()
 				btn[1] = 1;
 				if (evento.mouse.button & 1)
 				{
-					printf("x: %d, y: %d\n", x, y); //Aca entrará a la funcion para las opciones
+					//Aca entrará a la funcion para las opciones
+					cout << "x: " << x << "y: " << y << endl;
 				}
 				else
 				{
@@ -123,7 +110,8 @@ int main()
 				btn[2] = 1;
 				if (evento.mouse.button & 1)
 				{
-					printf("x: %d, y: %d\n", x, y); //Aca saldra del juego
+					//Aca saldra del juego
+					cout << "x: " << x << "y: " << y << endl;
 					return 1;
 				}
 				else
@@ -163,5 +151,81 @@ int main()
 
 		al_flip_display();
 
+	}
+}
+
+int menu::diffmenu(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP* menu_null, ALLEGRO_BITMAP* menu_0, ALLEGRO_BITMAP* menu_1, ALLEGRO_BITMAP* menu_2)
+{
+	int x = -1, y = -1;
+	ALLEGRO_COLOR negro = al_map_rgb(0, 0, 0);
+	while (true)
+	{
+		al_wait_for_event(queue, &evento);
+		al_draw_bitmap(menu_null, 0, 0, 0);
+
+
+		if (evento.type == ALLEGRO_EVENT_MOUSE_AXES || evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN)
+		{
+			//Posicion del mouse
+			x = evento.mouse.x;
+			y = evento.mouse.y;
+
+			if (x >= 56 && x <= 168 && y >= 290 && y <= 402)
+			{
+				if (evento.mouse.button & 1)
+				{
+					cout << "x: " << x << "y: " << y << endl;
+					return 1;
+				}
+			}
+
+			if (x >= 280 && x <= 392 && y >= 290 && y <= 402)
+			{
+				if (evento.mouse.button & 1)
+				{
+					cout << "x: " << x << "y: " << y << endl;
+					return 2;
+				}
+			}
+
+			if (x >= 504 && x <= 576 && y >= 290 && y <= 402)
+			{
+				if (evento.mouse.button & 1)
+				{
+					cout << "x: " << x << "y: " << y << endl;
+					return 3;
+				}
+			}
+
+		}
+
+		if (x >= 56 && x <= 168 && y >= 290 && y <= 402)
+		{
+			al_draw_bitmap(menu_0, 56, 290, 0);
+		}
+		else
+		{
+			al_draw_bitmap(menu_null, 0, 0, 0);
+		}
+
+		if (x >= 280 && x <= 392 && y >= 290 && y <= 402)
+		{
+			al_draw_bitmap(menu_1, 280, 290, 0);
+		}
+		else
+		{
+			al_draw_bitmap(menu_null, 0, 0, 0);
+		}
+
+		if (x >= 504 && x <= 576 && y >= 290 && y <= 402)
+		{
+			al_draw_bitmap(menu_2, 504, 290, 0);
+		}
+		else
+		{
+			al_draw_bitmap(menu_null, 0, 0, 0);
+		}
+
+		al_flip_display();
 	}
 }
