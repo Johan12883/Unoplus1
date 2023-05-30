@@ -1,5 +1,15 @@
 #pragma once
 #include <Windows.h>
+#include "menu.h"
+#include "Jugador.h"
+#include "deck.h"
+#include <allegro5/allegro.h>
+#include <allegro5/allegro_native_dialog.h>
+#include <allegro5/allegro_font.h>
+#include <allegro5/allegro_ttf.h>
+#include <allegro5/allegro_image.h>
+#include <allegro5/allegro_primitives.h>
+#include <iostream>
 class menu
 {
 public:
@@ -11,13 +21,15 @@ public:
 	int seg = 0;
 	int difficulty = 0;
 	// Jugar, Opciones, Salir
-	int btn[] = { 0,0,0 };
+	int btn[3] = { 0,0,0 };
 
 	int ancho_w = GetSystemMetrics(SM_CXSCREEN);
 	int alto_w = GetSystemMetrics(SM_CYSCREEN);
 
+	menu();
+
 	int initMenu(int ancho, int alto);
 	int diffmenu(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP* menu_null, ALLEGRO_BITMAP* menu_0, ALLEGRO_BITMAP* menu_1, ALLEGRO_BITMAP* menu_2);
-
+	int game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP* bg, int difficulty);
 };
 

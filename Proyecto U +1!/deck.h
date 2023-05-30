@@ -8,14 +8,14 @@ using std::map;
 class deck
 {
 public:
-	ALLEGRO_BITMAP* card;
+	int numPlayerDeck;
 	// first: color; second: numcard;
 	map <int, int> color_numcard;
-	map < ALLEGRO_BITMAP*, map <int, int>> deckcards;
+	map <map <int, int>, ALLEGRO_BITMAP*> deckcards;
 	
-	deck();
+	~deck();
+	ALLEGRO_BITMAP* genMidCard(int difficulty);
 	int genDeck(int difficulty);
-	int game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP* bg, int difficulty);
 	static deck& GetDeckP1();
 };
 

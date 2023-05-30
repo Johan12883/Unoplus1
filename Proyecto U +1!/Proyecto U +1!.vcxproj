@@ -171,7 +171,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="deck.h" />
-    <ClInclude Include="ingame.h" />
     <ClInclude Include="Jugador.h" />
     <ClInclude Include="menu.h" />
   </ItemGroup>
