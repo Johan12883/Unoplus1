@@ -222,6 +222,8 @@ int menu::game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP*
 {
 	Jugador::GetJugador1().Pdeck->genDeck(difficulty);
 	srand(time(NULL));
+	int colorRand, numCard;
+	
 	int ans = 2, ansbot1 = 2, ansbot2 = 2, ansbot3 = 2;
 	int x = -1, y = -1;
 	int randPC, randNC, randPC_aux, randNC_aux;
@@ -243,6 +245,7 @@ int menu::game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP*
 	randPC = rand() % 4;
 	randNC = rand() % 7;
 
+	//Carga de bitmaps
 	ALLEGRO_BITMAP* cardmid_draw[25];
 	ALLEGRO_BITMAP* engr = al_load_bitmap("Menus/engranaje.png");
 	ALLEGRO_BITMAP* backcard = al_load_bitmap("Cartas_Reverso/Carta_Atras.png");
@@ -251,9 +254,30 @@ int menu::game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP*
 	ALLEGRO_BITMAP* revrev = al_load_bitmap("Cartas_Reverso/Carta_Atras_Botrev.png");
 	ALLEGRO_BITMAP* passCard = al_load_bitmap("Menus/passCard.png");
 
-	ALLEGRO_BITMAP* midcard = Jugador::GetJugador1().Pdeck->genMidCard(difficulty);
+	//inicializacion del color y el numero de carta aleatorio para llamar a la funcion para generar
+	//la carta del medio de tablero
+	if (difficulty == 3)
+	{
+		colorRand = rand() % 5 + 1;
+	}
+	else if (difficulty == 1)
+	{
+		colorRand = rand() % 3 + 1;
+	}
+	else
+	{
+		colorRand = rand() % 4 + 1;
+	}
 
-	deck* cardmid_aux = new deck;
+	numCard = rand() % 9 + 1;
+
+	ALLEGRO_BITMAP* midcard = Jugador::GetJugador1().Pdeck->genCard(difficulty, colorRand, numCard);
+
+	deck* cardmidDeck = new deck;
+
+	cardmidDeck->color.push_back(colorRand);
+	cardmidDeck->numcard.push_back(numCard);
+	cardmidDeck->deckcards.push_back(midcard);
 
 	while (true)
 	{
@@ -261,49 +285,54 @@ int menu::game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP*
 		al_wait_for_event(queue, &evento);
 		al_draw_bitmap(bg, 0, 0, 0);
 
-		al_draw_bitmap(midcard, 580, 260, 0);
+		//Cargar la primera carta del medio del tablero con la clase "deck"
+		al_draw_bitmap(cardmidDeck->deckcards[0], 580, 260, 0);
 
-
-
-		al_draw_bitmap(revder, 0, 110, 0);
-		al_draw_bitmap(revder, 0, 170, 0);
-		al_draw_bitmap(revder, 0, 230, 0);
-		al_draw_bitmap(revder, 0, 290, 0);
-		al_draw_bitmap(revder, 0, 350, 0);
-		al_draw_bitmap(revder, 0, 410, 0);
-		al_draw_bitmap(revder, 0, 470, 0);
-
-		al_draw_bitmap(revizq, 1200, 110, 0);
-		al_draw_bitmap(revizq, 1200, 170, 0);
-		al_draw_bitmap(revizq, 1200, 230, 0);
-		al_draw_bitmap(revizq, 1200, 290, 0);
-		al_draw_bitmap(revizq, 1200, 350, 0);
-		al_draw_bitmap(revizq, 1200, 410, 0);
-		al_draw_bitmap(revizq, 1200, 470, 0);
-
-		al_draw_bitmap(revrev, 420, 0, 0);
-		al_draw_bitmap(revrev, 480, 0, 0);
-		al_draw_bitmap(revrev, 540, 0, 0);
-		al_draw_bitmap(revrev, 600, 0, 0);
-		al_draw_bitmap(revrev, 660, 0, 0);
-		al_draw_bitmap(revrev, 720, 0, 0);
-		al_draw_bitmap(revrev, 780, 0, 0);
-
-		int i = 0, x = 100, y = 535;
+		//Dibuja los reversos de las cartas
+		int i, j, x, y;
+		for (i = 0; i < 3; i++)
+		{
+			for (j = 0; j < 7; j++)
+			{
+				if (i == 0)
+				{
+					x = 0, y = 110;
+					al_draw_bitmap(revder, x, y, 0);
+					y += 60;
+				}
+				else if (i == 1)
+				{
+					x = 1200, y = 110;
+					al_draw_bitmap(revizq, x, y, 0);
+					y += 60;
+				}
+				else if (i == 2)
+				{
+					x = 420, y = 0;
+					al_draw_bitmap(revrev, x, y, 0);
+					x += 60;
+				}
+			}
+		}
+		
+		//Dibuja las cartas del jugador
+		i = 0, x = 100, y = 535;
 		for (auto crd : Jugador::GetJugador1().Pdeck->deckcards)
 		{
 			if (clickflag[i] == 0)
 			{
-				al_draw_bitmap(crd.second, x, y, 0);
+				al_draw_bitmap(crd, x, y, 0);
 				i++;
 				x += 140;
 			}
+			// Y, en tal caso que haya usado esa carta, se pondra el reverso de la carta y se
+			//deshablilitara su uso
 			else
 				al_draw_bitmap(backcard, x, y, 0);
 
 		}
 
-
+		//Dibuja obejtos del menu para las opciones y para pasar de turno
 		al_draw_bitmap(passCard, 980, 475, 0);
 		al_draw_bitmap(engr, 1230, 0, 0);
 
@@ -1101,4 +1130,17 @@ int menu::game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP*
 
 		al_flip_display();
 	}
+}
+
+int menu::OpMenu(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP* bg, deck midcard)
+{
+	while (true)
+	{
+		al_wait_for_event(queue, &evento);
+		al_draw_bitmap(bg, 0, 0, 0);
+
+		al_draw_bitmap(midcard.deckcards[0], 0, 0, 0);
+
+	}
+	return 0;
 }
