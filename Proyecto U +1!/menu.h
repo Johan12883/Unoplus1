@@ -2,6 +2,7 @@
 #include <Windows.h>
 #include "menu.h"
 #include "Jugador.h"
+#include "Card.h"
 #include "deck.h"
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_native_dialog.h>
@@ -31,6 +32,8 @@ public:
 	int initMenu(int ancho, int alto);
 	int diffmenu(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP* menu_null, ALLEGRO_BITMAP* menu_0, ALLEGRO_BITMAP* menu_1, ALLEGRO_BITMAP* menu_2);
 	int game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP* bg, int difficulty);
-	int OpMenu(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP* bg, deck midcard);
+	bool OpMenu(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, Card* midcard, Card* ChoosenCard);
+	int Operaciones(Card* midcard, Card* ChoosenCard, int randOp);
+	int GameOverMenu(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, int qcards);
 };
 

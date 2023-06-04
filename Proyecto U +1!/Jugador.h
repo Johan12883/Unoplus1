@@ -4,6 +4,7 @@ class Jugador
 {
 public:
 	int Pnum;
+	bool turn = false, AnsweredBool = false;
 	deck* Pdeck;
 
 	Jugador(int Pnum_, deck* deck_ = nullptr);

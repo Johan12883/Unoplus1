@@ -164,12 +164,14 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Card.cpp" />
     <ClCompile Include="deck.cpp" />
     <ClCompile Include="Jugador.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="menu.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Card.h" />
     <ClInclude Include="deck.h" />
     <ClInclude Include="Jugador.h" />
     <ClInclude Include="menu.h" />

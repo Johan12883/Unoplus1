@@ -3,22 +3,19 @@
 #include <allegro5/allegro_image.h>
 #include <map>
 #include <vector>
-#include <list>
+#include <memory>
+#include "Card.h"
+using std::unique_ptr;
 using std::map;
 using std::vector;
-using std::list;
 class deck
 {
 public:
-	int numPlayerDeck;
-	// first: color; second: numcard;
-	//map <int, int> color_numcard;
-	vector<int> color;
-	vector<int> numcard;
-	vector <ALLEGRO_BITMAP*> deckcards;
+	int numPlayerDeck = 0, CardsLeft = 7;
+	vector <Card*> deckcards;
+	vector <bool> CardsFlags = { true,true,true,true,true,true,true };
 	
 	~deck();
-	ALLEGRO_BITMAP* genCard(int difficulty, int colorRand, int numCard);
-	int genDeck(int difficulty);
+	deck* genDeck(int difficulty);
 };
 

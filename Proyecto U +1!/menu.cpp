@@ -1,6 +1,7 @@
 #include "menu.h"
 #include "Jugador.h"
 #include "deck.h"
+#include "Card.h"
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_native_dialog.h>
 #include <allegro5/allegro_font.h>
@@ -10,11 +11,13 @@
 #include <Windows.h>
 #include <stdlib.h>
 #include <iostream>
+#include <vector>
+#include <string>
 
 
 using std::cout;
 using std::endl;
-
+using std::to_string;
 menu::menu()
 {
 
@@ -192,25 +195,25 @@ int menu::diffmenu(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BIT
 				}
 			}
 
-		}
 
-		if (x >= 74 && x <= 382 && y >= 435 && y <= 527)
-		{
-			al_draw_bitmap(menu_0, 0, 0, 0);
+
+			if (x >= 74 && x <= 382 && y >= 435 && y <= 527)
+			{
+				al_draw_bitmap(menu_0, 0, 0, 0);
+			}
+			else if (x >= 500 && x <= 809 && y >= 435 && y <= 527)
+			{
+				al_draw_bitmap(menu_1, 0, 0, 0);
+			}
+			else if (x >= 905 && x <= 1214 && y >= 435 && y <= 527)
+			{
+				al_draw_bitmap(menu_2, 0, 0, 0);
+			}
+			else
+			{
+				al_draw_bitmap(menu_null, 0, 0, 0);
+			}
 		}
-		else if (x >= 500 && x <= 809 && y >= 435 && y <= 527)
-		{
-			al_draw_bitmap(menu_1, 0, 0, 0);
-		}
-		else if (x >= 905 && x <= 1214 && y >= 435 && y <= 527)
-		{
-			al_draw_bitmap(menu_2, 0, 0, 0);
-		}
-		else
-		{
-			al_draw_bitmap(menu_null, 0, 0, 0);
-		}
-		
 		al_flip_display();
 	}
 
@@ -220,33 +223,18 @@ int menu::diffmenu(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BIT
 
 int menu::game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP* bg, int difficulty)
 {
-	Jugador::GetJugador1().Pdeck->genDeck(difficulty);
+	Jugador::GetJugador1().Pdeck = Jugador::GetJugador1().Pdeck->genDeck(difficulty);
+	Jugador::GetJugador2().Pdeck = Jugador::GetJugador1().Pdeck->genDeck(difficulty);
+	Jugador::GetJugador3().Pdeck = Jugador::GetJugador1().Pdeck->genDeck(difficulty);
+	Jugador::GetJugador4().Pdeck = Jugador::GetJugador1().Pdeck->genDeck(difficulty);
 	srand(time(NULL));
 	int colorRand, numCard;
-	
-	int ans = 2, ansbot1 = 2, ansbot2 = 2, ansbot3 = 2;
+	bool StartGame = true;
+
 	int x = -1, y = -1;
-	int randPC, randNC, randPC_aux, randNC_aux;
-	int btn[7] = { 0,0,0,0,0,0,0 };
-	int clickflag[7] = { 0,0,0,0,0,0,0 };
-	int turn = 0;
-	int cardflag = 0;
 
-	int cardflagbot1 = 0;
-	int cardflagbot2 = 0;
-	int cardflagbot3 = 0;
-
-	int clickflagbot1[7] = { 0,0,0,0,0,0,0 };
-	int clickflagbot2[7] = { 0,0,0,0,0,0,0 };
-	int clickflagbot3[7] = { 0,0,0,0,0,0,0 };
-
-	int cardStart = 0;
-	int qturn = 0;
-	randPC = rand() % 4;
-	randNC = rand() % 7;
 
 	//Carga de bitmaps
-	ALLEGRO_BITMAP* cardmid_draw[25];
 	ALLEGRO_BITMAP* engr = al_load_bitmap("Menus/engranaje.png");
 	ALLEGRO_BITMAP* backcard = al_load_bitmap("Cartas_Reverso/Carta_Atras.png");
 	ALLEGRO_BITMAP* revder = al_load_bitmap("Cartas_Reverso/Carta_Atras_Botder.png");
@@ -271,14 +259,9 @@ int menu::game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP*
 
 	numCard = rand() % 9 + 1;
 
-	ALLEGRO_BITMAP* midcard = Jugador::GetJugador1().Pdeck->genCard(difficulty, colorRand, numCard);
-
-	deck* cardmidDeck = new deck;
-
-	cardmidDeck->color.push_back(colorRand);
-	cardmidDeck->numcard.push_back(numCard);
-	cardmidDeck->deckcards.push_back(midcard);
-
+	Card* prevcard = new Card;
+	Card* cardmid = new Card(colorRand, numCard);
+	cardmid->asset_card = cardmid->genCard(difficulty, colorRand, numCard);
 	while (true)
 	{
 
@@ -286,49 +269,54 @@ int menu::game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP*
 		al_draw_bitmap(bg, 0, 0, 0);
 
 		//Cargar la primera carta del medio del tablero con la clase "deck"
-		al_draw_bitmap(cardmidDeck->deckcards[0], 580, 260, 0);
+		al_draw_bitmap(cardmid->asset_card, 580, 260, 0);
 
 		//Dibuja los reversos de las cartas
-		int i, j, x, y;
+		int i, j, xB = -1, yB = -1;
 		for (i = 0; i < 3; i++)
 		{
 			for (j = 0; j < 7; j++)
 			{
 				if (i == 0)
 				{
-					x = 0, y = 110;
-					al_draw_bitmap(revder, x, y, 0);
-					y += 60;
+					if (j == 0)
+						yB = 110;
+					x = 0;
+					al_draw_bitmap(revder, xB, yB, 0);
+					yB += 60;
 				}
 				else if (i == 1)
 				{
-					x = 1200, y = 110;
-					al_draw_bitmap(revizq, x, y, 0);
-					y += 60;
+					if (j == 0)
+						yB = 110;
+					xB = 1200;
+					al_draw_bitmap(revizq, xB, yB, 0);
+					yB += 60;
 				}
 				else if (i == 2)
 				{
-					x = 420, y = 0;
-					al_draw_bitmap(revrev, x, y, 0);
-					x += 60;
+					if (j == 0)
+						xB = 420;
+					yB = 0;
+					al_draw_bitmap(revrev, xB, yB, 0);
+					xB += 60;
 				}
 			}
 		}
 		
 		//Dibuja las cartas del jugador
-		i = 0, x = 100, y = 535;
-		for (auto crd : Jugador::GetJugador1().Pdeck->deckcards)
+		int xP = 100, yP = 535;
+		for (i = 0; i < 6; i++)
 		{
-			if (clickflag[i] == 0)
+			if (Jugador::GetJugador1().Pdeck->CardsFlags[i] == true)
 			{
-				al_draw_bitmap(crd, x, y, 0);
-				i++;
-				x += 140;
+				al_draw_bitmap(Jugador::GetJugador1().Pdeck->deckcards.at(i)->asset_card, xP, yP, 0);
+				xP += 140;
 			}
 			// Y, en tal caso que haya usado esa carta, se pondra el reverso de la carta y se
 			//deshablilitara su uso
 			else
-				al_draw_bitmap(backcard, x, y, 0);
+				al_draw_bitmap(backcard, xP, yP, 0);
 
 		}
 
@@ -341,787 +329,643 @@ int menu::game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP*
 			//Posicion del mouse
 			x = evento.mouse.x;
 			y = evento.mouse.y;
-		}
 
-		if (turn == 0)
-		{
-			if (cardStart == 1 && cardflag == 0 && ans == 2)
-			{
-				ans = cardOp(evento, queue, cardmid_aux.numcard[randNC_aux], cardmid_aux.color[randNC_aux], cardmid.numcard[randNC], cardmid.color[randNC], 1);
-				ansbot1 = 2;
-				ansbot2 = 2;
-				ansbot3 = 2;
-				ans = 1;
-			}
+			cout << "x: " << x << " y: " << y << endl;
 
-			if (ans == 0)
+			Jugador::GetJugador1().turn = true;
+			if (Jugador::GetJugador1().turn == true)
 			{
-				cardflag = 1;
-				turn++;
-			}
-
-			if (x >= 980 && x <= 1028 && y >= 475 && y <= 515)
-			{
-				if (evento.mouse.button & 1)
+				if (StartGame == false && Jugador::GetJugador1().AnsweredBool == false)
 				{
-					turn++;
-					printf("A saltado turno!\n");
+					Jugador::GetJugador1().AnsweredBool = OpMenu(evento, queue, cardmid, prevcard);
 				}
-			}
 
-			if (cardflag == 0)
-			{
-				//Boton carta 1
-				if (x >= 100 && x <= 225 && y >= 535 && y <= 710)
+				if (Jugador::GetJugador1().AnsweredBool == false)
+				{
+					Jugador::GetJugador1().turn = false;
+				}
+
+				if (x >= 980 && x <= 1028 && y >= 475 && y <= 515)
 				{
 					if (evento.mouse.button & 1)
 					{
-						if (playerDeck.color[0] == Vdeck[randPC].color[randNC] || playerDeck.numcard[0] == Vdeck[randPC].numcard[randNC])
+						Jugador::GetJugador1().turn = false;
+						Jugador::GetJugador1().AnsweredBool = false;
+						printf("A saltado turno!\n");
+					}
+				}
+
+				if (Jugador::GetJugador1().turn == true)
+				{
+					if (Jugador::GetJugador1().Pdeck->CardsFlags[0] == true)
+					{
+						//Boton carta 1
+						if (x >= 100 && x <= 225 && y >= 535 && y <= 710)
 						{
-							if (clickflag[0] == 0)
+							if (evento.mouse.button & 1)
 							{
-								printf("x: %d, y: %d\n", x, y);
-								cardmid_aux = cardmid;
-								cardmid = playerDeck;
-								clickflag[0] = 1;
-								randNC_aux = randNC;
-								randPC_aux = randPC;
-								randNC = 0;
-								randPC = 0;
-								cardflag = 1;
-								turn++;
-								playerDeck.qcard = playerDeck.qcard - 1;
-								cardStart = 1;
+								if (Jugador::GetJugador1().Pdeck->deckcards.at(0)->color == cardmid->color || Jugador::GetJugador1().Pdeck->deckcards.at(0)->numcard == cardmid->numcard)
+								{
+									//midcard en la funcion de OpMenu
+									prevcard = cardmid;
+									//ChoosenCard en la funcion OpMenu
+									cardmid = Jugador::GetJugador1().Pdeck->deckcards.at(0);
+									Jugador::GetJugador1().Pdeck->CardsFlags[0] = false;
+									Jugador::GetJugador1().turn = false;
+									Jugador::GetJugador1().Pdeck->CardsLeft = Jugador::GetJugador1().Pdeck->CardsLeft - 1;
+									Jugador::GetJugador1().AnsweredBool = false;
+									if (StartGame == true)
+										StartGame = false;
+
+								}
 							}
 						}
 					}
 
-				}
-			}
 
 
-			if (cardflag == 0)
-			{
-				//Boton carta 2
-				if (x >= 240 && x <= 365 && y >= 535 && y <= 710)
-				{
-					if (evento.mouse.button & 1)
+					if (Jugador::GetJugador1().Pdeck->CardsFlags[1] == true)
 					{
-						if (playerDeck.color[1] == Vdeck[randPC].color[randNC] || playerDeck.numcard[1] == Vdeck[randPC].numcard[randNC])
+						//Boton carta 2
+						if (x >= 240 && x <= 365 && y >= 535 && y <= 710)
 						{
-							if (clickflag[1] == 0)
+							if (evento.mouse.button & 1)
 							{
-								printf("x: %d, y: %d\n", x, y);
-								cardmid_aux = cardmid;
-								cardmid = playerDeck;
-								clickflag[1] = 1;
-								randNC_aux = randNC;
-								randPC_aux = randPC;
-								randNC = 1;
-								randPC = 0;
-								cardflag = 1;
-								turn++;
-								playerDeck.qcard = playerDeck.qcard - 1;
-								cardStart = 1;
+								if (Jugador::GetJugador1().Pdeck->deckcards.at(1)->color == cardmid->color || Jugador::GetJugador1().Pdeck->deckcards.at(1)->numcard == cardmid->numcard)
+								{
+									//midcard en la funcion de OpMenu
+									prevcard = cardmid;
+									//ChoosenCard en la funcion OpMenu
+									cardmid = Jugador::GetJugador1().Pdeck->deckcards.at(1);
+									Jugador::GetJugador1().Pdeck->CardsFlags[1] = false;
+									Jugador::GetJugador1().turn = false;
+									Jugador::GetJugador1().Pdeck->CardsLeft = Jugador::GetJugador1().Pdeck->CardsLeft - 1;
+									Jugador::GetJugador1().AnsweredBool = false;
+									if (StartGame == true)
+										StartGame = false;
+								}
+							}
+						}
+					}
+
+
+					if (Jugador::GetJugador1().Pdeck->CardsFlags[2] == true)
+					{
+						//Boton carta 3
+						if (x >= 380 && x <= 505 && y >= 535 && y <= 710)
+						{
+							if (evento.mouse.button & 1)
+							{
+								if (Jugador::GetJugador1().Pdeck->deckcards.at(2)->color == cardmid->color || Jugador::GetJugador1().Pdeck->deckcards.at(2)->numcard == cardmid->numcard)
+								{
+									//midcard en la funcion de OpMenu
+									prevcard = cardmid;
+									//ChoosenCard en la funcion OpMenu
+									cardmid = Jugador::GetJugador1().Pdeck->deckcards.at(2);
+									Jugador::GetJugador1().Pdeck->CardsFlags[2] = false;
+									Jugador::GetJugador1().turn = false;
+									Jugador::GetJugador1().Pdeck->CardsLeft = Jugador::GetJugador1().Pdeck->CardsLeft - 1;
+									Jugador::GetJugador1().AnsweredBool = false;
+									if (StartGame == true)
+										StartGame = false;
+								}
+							}
+						}
+					}
+
+					if (Jugador::GetJugador1().Pdeck->CardsFlags[3] == true)
+					{
+						//Boton carta 4
+						if (x >= 520 && x <= 645 && y >= 535 && y <= 710)
+						{
+							if (evento.mouse.button & 1)
+							{
+								if (Jugador::GetJugador1().Pdeck->deckcards.at(3)->color == cardmid->color || Jugador::GetJugador1().Pdeck->deckcards.at(3)->numcard == cardmid->numcard)
+								{
+									//midcard en la funcion de OpMenu
+									prevcard = cardmid;
+									//ChoosenCard en la funcion OpMenu
+									cardmid = Jugador::GetJugador1().Pdeck->deckcards.at(3);
+									Jugador::GetJugador1().Pdeck->CardsFlags[3] = false;
+									Jugador::GetJugador1().turn = false;
+									Jugador::GetJugador1().Pdeck->CardsLeft = Jugador::GetJugador1().Pdeck->CardsLeft - 1;
+									Jugador::GetJugador1().AnsweredBool = false;
+									if (StartGame == true)
+										StartGame = false;
+								}
+							}
+						}
+					}
+
+					if (Jugador::GetJugador1().Pdeck->CardsFlags[4] == true)
+					{
+						//Boton carta 5
+						if (x >= 660 && x <= 785 && y >= 535 && y <= 710)
+						{
+							if (evento.mouse.button & 1)
+							{
+								if (Jugador::GetJugador1().Pdeck->deckcards.at(4)->color == cardmid->color || Jugador::GetJugador1().Pdeck->deckcards.at(4)->numcard == cardmid->numcard)
+								{
+									//midcard en la funcion de OpMenu
+									prevcard = cardmid;
+									//ChoosenCard en la funcion OpMenu
+									cardmid = Jugador::GetJugador1().Pdeck->deckcards.at(4);
+									Jugador::GetJugador1().Pdeck->CardsFlags[4] = false;
+									Jugador::GetJugador1().turn = false;
+									Jugador::GetJugador1().Pdeck->CardsLeft = Jugador::GetJugador1().Pdeck->CardsLeft - 1;
+									Jugador::GetJugador1().AnsweredBool = false;
+									if (StartGame == true)
+										StartGame = false;
+								}
+							}
+
+						}
+					}
+
+					if (Jugador::GetJugador1().Pdeck->CardsFlags[5] == true)
+					{
+						//Boton carta 6
+						if (x >= 800 && x <= 925 && y >= 535 && y <= 710)
+						{
+							if (evento.mouse.button & 1)
+							{
+								if (Jugador::GetJugador1().Pdeck->deckcards.at(5)->color == cardmid->color || Jugador::GetJugador1().Pdeck->deckcards.at(5)->numcard == cardmid->numcard)
+								{
+									//midcard en la funcion de OpMenu
+									prevcard = cardmid;
+									//ChoosenCard en la funcion OpMenu
+									cardmid = Jugador::GetJugador1().Pdeck->deckcards.at(5);
+									Jugador::GetJugador1().Pdeck->CardsFlags[5] = false;
+									Jugador::GetJugador1().turn = false;
+									Jugador::GetJugador1().Pdeck->CardsLeft = Jugador::GetJugador1().Pdeck->CardsLeft - 1;
+									Jugador::GetJugador1().AnsweredBool = false;
+									if (StartGame == true)
+										StartGame = false;
+								}
+							}
+
+						}
+					}
+
+
+					if (Jugador::GetJugador1().Pdeck->CardsFlags[6] == true)
+					{
+						//Boton carta 7
+						if (x >= 940 && x <= 1065 && y >= 535 && y <= 710)
+						{
+
+							if (evento.mouse.button & 1)
+							{
+								if (Jugador::GetJugador1().Pdeck->deckcards.at(6)->color == cardmid->color || Jugador::GetJugador1().Pdeck->deckcards.at(6)->numcard == cardmid->numcard)
+								{
+									//midcard en la funcion de OpMenu
+									prevcard = cardmid;
+									//ChoosenCard en la funcion OpMenu
+									cardmid = Jugador::GetJugador1().Pdeck->deckcards.at(6);
+									Jugador::GetJugador1().Pdeck->CardsFlags[6] = false;
+									Jugador::GetJugador1().turn = false;
+									Jugador::GetJugador1().Pdeck->CardsLeft = Jugador::GetJugador1().Pdeck->CardsLeft - 1;
+									Jugador::GetJugador1().AnsweredBool = false;
+									if (StartGame == true)
+										StartGame = false;
+								}
 							}
 						}
 					}
 				}
 			}
 
-			if (cardflag == 0)
+			Jugador::GetJugador2().turn = true;
+			if (Jugador::GetJugador2().turn == true)
 			{
-				//Boton carta 3
-				if (x >= 380 && x <= 505 && y >= 535 && y <= 710)
+				if (StartGame == false && Jugador::GetJugador2().AnsweredBool == false)
 				{
-					if (evento.mouse.button & 1)
+					Jugador::GetJugador2().AnsweredBool = OpMenu(evento, queue, cardmid, prevcard);
+				}
+
+				if (Jugador::GetJugador2().AnsweredBool == false)
+				{
+					Jugador::GetJugador2().turn = false;
+				}
+
+				Sleep(500);
+				if (Jugador::GetJugador2().turn == true)
+				{
+					if (Jugador::GetJugador2().Pdeck->CardsFlags[0] == true)
 					{
-						if (playerDeck.color[2] == Vdeck[randPC].color[randNC] || playerDeck.numcard[2] == Vdeck[randPC].numcard[randNC])
+						if (Jugador::GetJugador2().Pdeck->deckcards.at(0)->color == cardmid->color || Jugador::GetJugador2().Pdeck->deckcards.at(0)->numcard == cardmid->numcard)
 						{
-							if (clickflag[2] == 0)
-							{
-								printf("x: %d, y: %d\n", x, y);
-								cardmid_aux = cardmid;
-								cardmid = playerDeck;
-								clickflag[2] = 1;
-								randNC_aux = randNC;
-								randPC_aux = randPC;
-								randNC = 2;
-								randPC = 0;
-								cardflag = 1;
-								turn++;
-								playerDeck.qcard = playerDeck.qcard - 1;
-								cardStart = 1;
-							}
+							//midcard en la funcion de OpMenu
+							prevcard = cardmid;
+							//ChoosenCard en la funcion OpMenu
+							cardmid = Jugador::GetJugador2().Pdeck->deckcards.at(0);
+							Jugador::GetJugador2().Pdeck->CardsFlags[0] = false;
+							Jugador::GetJugador2().turn = false;
+							Jugador::GetJugador2().Pdeck->CardsLeft = Jugador::GetJugador2().Pdeck->CardsLeft - 1;
+							Jugador::GetJugador2().AnsweredBool = false;
+							if (StartGame == true)
+								StartGame = false;
 						}
 					}
 
-				}
-			}
 
 
-			if (cardflag == 0)
-			{
-				//Boton carta 4
-				if (x >= 520 && x <= 645 && y >= 535 && y <= 710)
-				{
-					if (evento.mouse.button & 1)
+					if (Jugador::GetJugador2().Pdeck->CardsFlags[1] == true)
 					{
-						if (playerDeck.color[3] == Vdeck[randPC].color[randNC] || playerDeck.numcard[3] == Vdeck[randPC].numcard[randNC])
+						if (Jugador::GetJugador2().Pdeck->deckcards.at(1)->color == cardmid->color || Jugador::GetJugador2().Pdeck->deckcards.at(1)->numcard == cardmid->numcard)
 						{
-							if (clickflag[3] == 0)
-							{
-								printf("x: %d, y: %d\n", x, y);
-								cardmid_aux = cardmid;
-								cardmid = playerDeck;
-								clickflag[3] = 1;
-								randNC_aux = randNC;
-								randPC_aux = randPC;
-								randNC = 3;
-								randPC = 0;
-								cardflag = 1;
-								turn++;
-								playerDeck.qcard = playerDeck.qcard - 1;
-								cardStart = 1;
-							}
+							//midcard en la funcion de OpMenu
+							prevcard = cardmid;
+							//ChoosenCard en la funcion OpMenu
+							cardmid = Jugador::GetJugador2().Pdeck->deckcards.at(1);
+							Jugador::GetJugador2().Pdeck->CardsFlags[1] = false;
+							Jugador::GetJugador2().turn = false;
+							Jugador::GetJugador2().Pdeck->CardsLeft = Jugador::GetJugador2().Pdeck->CardsLeft - 1;
+							Jugador::GetJugador2().AnsweredBool = false;
+							if (StartGame == true)
+								StartGame = false;
+						}
+					}
+
+
+					if (Jugador::GetJugador2().Pdeck->CardsFlags[2] == true)
+					{
+						if (Jugador::GetJugador2().Pdeck->deckcards.at(2)->color == cardmid->color || Jugador::GetJugador2().Pdeck->deckcards.at(2)->numcard == cardmid->numcard)
+						{
+							//midcard en la funcion de OpMenu
+							prevcard = cardmid;
+							//ChoosenCard en la funcion OpMenu
+							cardmid = Jugador::GetJugador2().Pdeck->deckcards.at(2);
+							Jugador::GetJugador2().Pdeck->CardsFlags[2] = false;
+							Jugador::GetJugador2().turn = false;
+							Jugador::GetJugador2().Pdeck->CardsLeft = Jugador::GetJugador2().Pdeck->CardsLeft - 1;
+							Jugador::GetJugador2().AnsweredBool = false;
+							if (StartGame == true)
+								StartGame = false;
+						}
+					}
+
+					if (Jugador::GetJugador2().Pdeck->CardsFlags[3] == true)
+					{
+						if (Jugador::GetJugador2().Pdeck->deckcards.at(3)->color == cardmid->color || Jugador::GetJugador2().Pdeck->deckcards.at(3)->numcard == cardmid->numcard)
+						{
+							//midcard en la funcion de OpMenu
+							prevcard = cardmid;
+							//ChoosenCard en la funcion OpMenu
+							cardmid = Jugador::GetJugador2().Pdeck->deckcards.at(3);
+							Jugador::GetJugador2().Pdeck->CardsFlags[3] = false;
+							Jugador::GetJugador2().turn = false;
+							Jugador::GetJugador2().Pdeck->CardsLeft = Jugador::GetJugador2().Pdeck->CardsLeft - 1;
+							Jugador::GetJugador2().AnsweredBool = false;
+							if (StartGame == true)
+								StartGame = false;
+						}
+					}
+
+					if (Jugador::GetJugador2().Pdeck->CardsFlags[4] == true)
+					{
+						if (Jugador::GetJugador2().Pdeck->deckcards.at(4)->color == cardmid->color || Jugador::GetJugador2().Pdeck->deckcards.at(4)->numcard == cardmid->numcard)
+						{
+							//midcard en la funcion de OpMenu
+							prevcard = cardmid;
+							//ChoosenCard en la funcion OpMenu
+							cardmid = Jugador::GetJugador2().Pdeck->deckcards.at(4);
+							Jugador::GetJugador2().Pdeck->CardsFlags[4] = false;
+							Jugador::GetJugador2().turn = false;
+							Jugador::GetJugador2().Pdeck->CardsLeft = Jugador::GetJugador2().Pdeck->CardsLeft - 1;
+							Jugador::GetJugador2().AnsweredBool = false;
+							if (StartGame == true)
+								StartGame = false;
+						}
+					}
+
+					if (Jugador::GetJugador2().Pdeck->CardsFlags[5] == true)
+					{
+						if (Jugador::GetJugador2().Pdeck->deckcards.at(5)->color == cardmid->color || Jugador::GetJugador2().Pdeck->deckcards.at(5)->numcard == cardmid->numcard)
+						{
+							//midcard en la funcion de OpMenu
+							prevcard = cardmid;
+							//ChoosenCard en la funcion OpMenu
+							cardmid = Jugador::GetJugador2().Pdeck->deckcards.at(5);
+							Jugador::GetJugador2().Pdeck->CardsFlags[5] = false;
+							Jugador::GetJugador2().turn = false;
+							Jugador::GetJugador2().Pdeck->CardsLeft = Jugador::GetJugador2().Pdeck->CardsLeft - 1;
+							Jugador::GetJugador2().AnsweredBool = false;
+							if (StartGame == true)
+								StartGame = false;
+						}
+					}
+
+
+					if (Jugador::GetJugador2().Pdeck->CardsFlags[6] == true)
+					{
+						if (Jugador::GetJugador2().Pdeck->deckcards.at(6)->color == cardmid->color || Jugador::GetJugador2().Pdeck->deckcards.at(6)->numcard == cardmid->numcard)
+						{
+							//midcard en la funcion de OpMenu
+							prevcard = cardmid;
+							//ChoosenCard en la funcion OpMenu
+							cardmid = Jugador::GetJugador2().Pdeck->deckcards.at(6);
+							Jugador::GetJugador2().Pdeck->CardsFlags[6] = false;
+							Jugador::GetJugador2().turn = false;
+							Jugador::GetJugador2().Pdeck->CardsLeft = Jugador::GetJugador2().Pdeck->CardsLeft - 1;
+							Jugador::GetJugador2().AnsweredBool = false;
+							if (StartGame == true)
+								StartGame = false;
 						}
 					}
 				}
 			}
 
-			if (cardflag == 0)
+			if (Jugador::GetJugador2().turn == true && Jugador::GetJugador2().AnsweredBool == true)
 			{
-				//Boton carta 5
-				if (x >= 660 && x <= 785 && y >= 535 && y <= 710)
+				Jugador::GetJugador2().turn = false;
+				Jugador::GetJugador2().AnsweredBool = false;
+			}
+
+			Jugador::GetJugador3().turn = true;
+			if (Jugador::GetJugador3().turn == true)
+			{
+				if (StartGame == false && Jugador::GetJugador3().AnsweredBool == false)
 				{
-					if (evento.mouse.button & 1)
+					Jugador::GetJugador3().AnsweredBool = OpMenu(evento, queue, cardmid, prevcard);
+				}
+
+				if (Jugador::GetJugador3().AnsweredBool == false)
+				{
+					Jugador::GetJugador3().turn = false;
+				}
+
+				Sleep(500);
+				if (Jugador::GetJugador3().turn == true)
+				{
+					if (Jugador::GetJugador3().Pdeck->CardsFlags[0] == true)
 					{
-						if (playerDeck.color[4] == Vdeck[randPC].color[randNC] || playerDeck.numcard[4] == Vdeck[randPC].numcard[randNC])
+						if (Jugador::GetJugador3().Pdeck->deckcards.at(0)->color == cardmid->color || Jugador::GetJugador3().Pdeck->deckcards.at(0)->numcard == cardmid->numcard)
 						{
-							if (clickflag[4] == 0)
-							{
-								printf("x: %d, y: %d\n", x, y);
-								cardmid_aux = cardmid;
-								cardmid = playerDeck;
-								clickflag[4] = 1;
-								randNC_aux = randNC;
-								randPC_aux = randPC;
-								randNC = 4;
-								randPC = 0;
-								cardflag = 1;
-								turn++;
-								playerDeck.qcard = playerDeck.qcard - 1;
-								cardStart = 1;
-							}
+							//midcard en la funcion de OpMenu
+							prevcard = cardmid;
+							//ChoosenCard en la funcion OpMenu
+							cardmid = Jugador::GetJugador3().Pdeck->deckcards.at(0);
+							Jugador::GetJugador3().Pdeck->CardsFlags[0] = false;
+							Jugador::GetJugador3().turn = false;
+							Jugador::GetJugador3().Pdeck->CardsLeft = Jugador::GetJugador3().Pdeck->CardsLeft - 1;
+							Jugador::GetJugador3().AnsweredBool = false;
+							if (StartGame == true)
+								StartGame = false;
 						}
 					}
 
-				}
-			}
 
-			if (cardflag == 0)
-			{
-				//Boton carta 6
-				if (x >= 800 && x <= 925 && y >= 535 && y <= 710)
-				{
-					if (evento.mouse.button & 1)
+
+					if (Jugador::GetJugador3().Pdeck->CardsFlags[1] == true)
 					{
-						if (playerDeck.color[5] == Vdeck[randPC].color[randNC] || playerDeck.numcard[5] == Vdeck[randPC].numcard[randNC])
+						if (Jugador::GetJugador3().Pdeck->deckcards.at(1)->color == cardmid->color || Jugador::GetJugador3().Pdeck->deckcards.at(1)->numcard == cardmid->numcard)
 						{
-							if (clickflag[5] == 0)
-							{
-								printf("x: %d, y: %d\n", x, y);
-								cardmid_aux = cardmid;
-								cardmid = playerDeck;
-								clickflag[5] = 1;
-								randNC_aux = randNC;
-								randPC_aux = randPC;
-								randNC = 5;
-								randPC = 0;
-								cardflag = 1;
-								turn++;
-								playerDeck.qcard = playerDeck.qcard - 1;
-								cardStart = 1;
-							}
+							//midcard en la funcion de OpMenu
+							prevcard = cardmid;
+							//ChoosenCard en la funcion OpMenu
+							cardmid = Jugador::GetJugador3().Pdeck->deckcards.at(1);
+							Jugador::GetJugador3().Pdeck->CardsFlags[1] = false;
+							Jugador::GetJugador3().turn = false;
+							Jugador::GetJugador3().Pdeck->CardsLeft = Jugador::GetJugador3().Pdeck->CardsLeft - 1;
+							Jugador::GetJugador3().AnsweredBool = false;
+							if (StartGame == true)
+								StartGame = false;
 						}
 					}
 
-				}
-			}
 
-			if (cardflag == 0)
-			{
-				//Boton carta 7
-				if (x >= 940 && x <= 1065 && y >= 535 && y <= 710)
-				{
-
-					if (evento.mouse.button & 1)
+					if (Jugador::GetJugador3().Pdeck->CardsFlags[2] == true)
 					{
-						if (playerDeck.color[6] == Vdeck[randPC].color[randNC] || playerDeck.numcard[6] == Vdeck[randPC].numcard[randNC])
+						if (Jugador::GetJugador3().Pdeck->deckcards.at(2)->color == cardmid->color || Jugador::GetJugador3().Pdeck->deckcards.at(2)->numcard == cardmid->numcard)
 						{
-							if (clickflag[6] == 0)
-							{
-								printf("x: %d, y: %d\n", x, y);
-								cardmid_aux = cardmid;
-								cardmid = playerDeck;
-								clickflag[6] = 1;
-								randNC_aux = randNC;
-								randPC_aux = randPC;
-								randNC = 6;
-								randPC = 0;
-								cardflag = 1;
-								turn++;
-								playerDeck.qcard = playerDeck.qcard - 1;
-								cardStart = 1;
-							}
+							//midcard en la funcion de OpMenu
+							prevcard = cardmid;
+							//ChoosenCard en la funcion OpMenu
+							cardmid = Jugador::GetJugador3().Pdeck->deckcards.at(2);
+							Jugador::GetJugador3().Pdeck->CardsFlags[2] = false;
+							Jugador::GetJugador3().turn = false;
+							Jugador::GetJugador3().Pdeck->CardsLeft = Jugador::GetJugador3().Pdeck->CardsLeft - 1;
+							Jugador::GetJugador3().AnsweredBool = false;
+							if (StartGame == true)
+								StartGame = false;
 						}
 					}
 
+					if (Jugador::GetJugador3().Pdeck->CardsFlags[3] == true)
+					{
+						if (Jugador::GetJugador3().Pdeck->deckcards.at(3)->color == cardmid->color || Jugador::GetJugador3().Pdeck->deckcards.at(3)->numcard == cardmid->numcard)
+						{
+							//midcard en la funcion de OpMenu
+							prevcard = cardmid;
+							//ChoosenCard en la funcion OpMenu
+							cardmid = Jugador::GetJugador3().Pdeck->deckcards.at(3);
+							Jugador::GetJugador3().Pdeck->CardsFlags[3] = false;
+							Jugador::GetJugador3().turn = false;
+							Jugador::GetJugador3().Pdeck->CardsLeft = Jugador::GetJugador3().Pdeck->CardsLeft - 1;
+							Jugador::GetJugador3().AnsweredBool = false;
+							if (StartGame == true)
+								StartGame = false;
+						}
+					}
+
+					if (Jugador::GetJugador3().Pdeck->CardsFlags[4] == true)
+					{
+						if (Jugador::GetJugador3().Pdeck->deckcards.at(4)->color == cardmid->color || Jugador::GetJugador3().Pdeck->deckcards.at(4)->numcard == cardmid->numcard)
+						{
+							//midcard en la funcion de OpMenu
+							prevcard = cardmid;
+							//ChoosenCard en la funcion OpMenu
+							cardmid = Jugador::GetJugador3().Pdeck->deckcards.at(4);
+							Jugador::GetJugador3().Pdeck->CardsFlags[4] = false;
+							Jugador::GetJugador3().turn = false;
+							Jugador::GetJugador3().Pdeck->CardsLeft = Jugador::GetJugador3().Pdeck->CardsLeft - 1;
+							Jugador::GetJugador3().AnsweredBool = false;
+							if (StartGame == true)
+								StartGame = false;
+						}
+					}
+
+					if (Jugador::GetJugador3().Pdeck->CardsFlags[5] == true)
+					{
+						if (Jugador::GetJugador3().Pdeck->deckcards.at(5)->color == cardmid->color || Jugador::GetJugador3().Pdeck->deckcards.at(5)->numcard == cardmid->numcard)
+						{
+							//midcard en la funcion de OpMenu
+							prevcard = cardmid;
+							//ChoosenCard en la funcion OpMenu
+							cardmid = Jugador::GetJugador3().Pdeck->deckcards.at(5);
+							Jugador::GetJugador3().Pdeck->CardsFlags[5] = false;
+							Jugador::GetJugador3().turn = false;
+							Jugador::GetJugador3().Pdeck->CardsLeft = Jugador::GetJugador3().Pdeck->CardsLeft - 1;
+							Jugador::GetJugador3().AnsweredBool = false;
+							if (StartGame == true)
+								StartGame = false;
+						}
+					}
+
+
+					if (Jugador::GetJugador3().Pdeck->CardsFlags[6] == true)
+					{
+						if (Jugador::GetJugador3().Pdeck->deckcards.at(6)->color == cardmid->color || Jugador::GetJugador3().Pdeck->deckcards.at(6)->numcard == cardmid->numcard)
+						{
+							//midcard en la funcion de OpMenu
+							prevcard = cardmid;
+							//ChoosenCard en la funcion OpMenu
+							cardmid = Jugador::GetJugador3().Pdeck->deckcards.at(6);
+							Jugador::GetJugador3().Pdeck->CardsFlags[6] = false;
+							Jugador::GetJugador3().turn = false;
+							Jugador::GetJugador3().Pdeck->CardsLeft = Jugador::GetJugador3().Pdeck->CardsLeft - 1;
+							Jugador::GetJugador3().AnsweredBool = false;
+							if (StartGame == true)
+								StartGame = false;
+						}
+					}
 				}
 			}
 
-
-
-		}
-
-		if (turn == 1)
-		{
-			if (cardStart == 1 && cardflagbot1 == 0 && ansbot1 == 2)
+			if (Jugador::GetJugador4().turn == true && Jugador::GetJugador4().AnsweredBool == true)
 			{
-				ansbot1 = cardOp(evento, queue, cardmid_aux.numcard[randNC_aux], cardmid_aux.color[randNC_aux], cardmid.numcard[randNC], cardmid.color[randNC], 0);
-				ans = 2;
-				ansbot2 = 2;
-				ansbot3 = 2;
-				ansbot1 = 1;
+				Jugador::GetJugador4().turn = false;
+				Jugador::GetJugador4().AnsweredBool = false;
 			}
 
-			if (ansbot1 == 0)
-			{
-				cardflagbot1 = 1;
-				turn++;
-			}
 
 			Sleep(500);
-			if (cardflagbot1 == 0)
+			if (Jugador::GetJugador4().turn == true)
 			{
-				if (Vdeck[1].color[0] == Vdeck[randPC].color[randNC] || Vdeck[1].numcard[0] == Vdeck[randPC].numcard[randNC])
+				if (Jugador::GetJugador4().Pdeck->CardsFlags[0] == true)
 				{
-					if (clickflagbot1[0] == 0)
+					if (Jugador::GetJugador4().Pdeck->deckcards.at(0)->color == cardmid->color || Jugador::GetJugador4().Pdeck->deckcards.at(0)->numcard == cardmid->numcard)
 					{
-						cardmid_aux = cardmid;
-						cardmid = Vdeck[1];
-						randNC_aux = randNC;
-						randPC_aux = randPC;
-						randNC = 0;
-						randPC = 1;
-						turn++;
-						Vdeck[1].qcard = Vdeck[1].qcard - 1;
-						clickflagbot1[0] = 1;
-						cardflagbot1 = 1;
-						printf("Turno de bot 1\n");
-						cardStart = 1;
+						//midcard en la funcion de OpMenu
+						prevcard = cardmid;
+						//ChoosenCard en la funcion OpMenu
+						cardmid = Jugador::GetJugador4().Pdeck->deckcards.at(0);
+						Jugador::GetJugador4().Pdeck->CardsFlags[0] = false;
+						Jugador::GetJugador4().turn = false;
+						Jugador::GetJugador4().Pdeck->CardsLeft = Jugador::GetJugador4().Pdeck->CardsLeft - 1;
+						Jugador::GetJugador4().AnsweredBool = false;
+						if (StartGame == true)
+							StartGame = false;
+					}
+				}
+
+
+
+				if (Jugador::GetJugador4().Pdeck->CardsFlags[1] == true)
+				{
+					if (Jugador::GetJugador4().Pdeck->deckcards.at(1)->color == cardmid->color || Jugador::GetJugador4().Pdeck->deckcards.at(1)->numcard == cardmid->numcard)
+					{
+						//midcard en la funcion de OpMenu
+						prevcard = cardmid;
+						//ChoosenCard en la funcion OpMenu
+						cardmid = Jugador::GetJugador4().Pdeck->deckcards.at(1);
+						Jugador::GetJugador4().Pdeck->CardsFlags[1] = false;
+						Jugador::GetJugador4().turn = false;
+						Jugador::GetJugador4().Pdeck->CardsLeft = Jugador::GetJugador4().Pdeck->CardsLeft - 1;
+						Jugador::GetJugador4().AnsweredBool = false;
+						if (StartGame == true)
+							StartGame = false;
+					}
+				}
+
+
+				if (Jugador::GetJugador4().Pdeck->CardsFlags[2] == true)
+				{
+					if (Jugador::GetJugador4().Pdeck->deckcards.at(2)->color == cardmid->color || Jugador::GetJugador4().Pdeck->deckcards.at(2)->numcard == cardmid->numcard)
+					{
+						//midcard en la funcion de OpMenu
+						prevcard = cardmid;
+						//ChoosenCard en la funcion OpMenu
+						cardmid = Jugador::GetJugador4().Pdeck->deckcards.at(2);
+						Jugador::GetJugador4().Pdeck->CardsFlags[2] = false;
+						Jugador::GetJugador4().turn = false;
+						Jugador::GetJugador4().Pdeck->CardsLeft = Jugador::GetJugador4().Pdeck->CardsLeft - 1;
+						Jugador::GetJugador4().AnsweredBool = false;
+						if (StartGame == true)
+							StartGame = false;
+					}
+				}
+
+				if (Jugador::GetJugador4().Pdeck->CardsFlags[3] == true)
+				{
+					if (Jugador::GetJugador4().Pdeck->deckcards.at(3)->color == cardmid->color || Jugador::GetJugador4().Pdeck->deckcards.at(3)->numcard == cardmid->numcard)
+					{
+						//midcard en la funcion de OpMenu
+						prevcard = cardmid;
+						//ChoosenCard en la funcion OpMenu
+						cardmid = Jugador::GetJugador4().Pdeck->deckcards.at(3);
+						Jugador::GetJugador4().Pdeck->CardsFlags[3] = false;
+						Jugador::GetJugador4().turn = false;
+						Jugador::GetJugador4().Pdeck->CardsLeft = Jugador::GetJugador4().Pdeck->CardsLeft - 1;
+						Jugador::GetJugador4().AnsweredBool = false;
+						if (StartGame == true)
+							StartGame = false;
+					}
+				}
+
+				if (Jugador::GetJugador4().Pdeck->CardsFlags[4] == true)
+				{
+					if (Jugador::GetJugador4().Pdeck->deckcards.at(4)->color == cardmid->color || Jugador::GetJugador4().Pdeck->deckcards.at(4)->numcard == cardmid->numcard)
+					{
+						//midcard en la funcion de OpMenu
+						prevcard = cardmid;
+						//ChoosenCard en la funcion OpMenu
+						cardmid = Jugador::GetJugador4().Pdeck->deckcards.at(4);
+						Jugador::GetJugador4().Pdeck->CardsFlags[4] = false;
+						Jugador::GetJugador4().turn = false;
+						Jugador::GetJugador4().Pdeck->CardsLeft = Jugador::GetJugador4().Pdeck->CardsLeft - 1;
+						Jugador::GetJugador4().AnsweredBool = false;
+						if (StartGame == true)
+							StartGame = false;
+					}
+				}
+
+				if (Jugador::GetJugador4().Pdeck->CardsFlags[5] == true)
+				{
+					if (Jugador::GetJugador4().Pdeck->deckcards.at(5)->color == cardmid->color || Jugador::GetJugador4().Pdeck->deckcards.at(5)->numcard == cardmid->numcard)
+					{
+						//midcard en la funcion de OpMenu
+						prevcard = cardmid;
+						//ChoosenCard en la funcion OpMenu
+						cardmid = Jugador::GetJugador4().Pdeck->deckcards.at(5);
+						Jugador::GetJugador4().Pdeck->CardsFlags[5] = false;
+						Jugador::GetJugador4().turn = false;
+						Jugador::GetJugador4().Pdeck->CardsLeft = Jugador::GetJugador4().Pdeck->CardsLeft - 1;
+						Jugador::GetJugador4().AnsweredBool = false;
+						if (StartGame == true)
+							StartGame = false;
+					}
+				}
+
+
+				if (Jugador::GetJugador4().Pdeck->CardsFlags[6] == true)
+				{
+					if (Jugador::GetJugador4().Pdeck->deckcards.at(6)->color == cardmid->color || Jugador::GetJugador4().Pdeck->deckcards.at(6)->numcard == cardmid->numcard)
+					{
+						//midcard en la funcion de OpMenu
+						prevcard = cardmid;
+						//ChoosenCard en la funcion OpMenu
+						cardmid = Jugador::GetJugador4().Pdeck->deckcards.at(6);
+						Jugador::GetJugador4().Pdeck->CardsFlags[6] = false;
+						Jugador::GetJugador4().turn = false;
+						Jugador::GetJugador4().Pdeck->CardsLeft = Jugador::GetJugador4().Pdeck->CardsLeft - 1;
+						Jugador::GetJugador4().AnsweredBool = false;
+						if (StartGame == true)
+							StartGame = false;
 					}
 				}
 			}
-			if (cardflagbot1 == 0)
+			if (Jugador::GetJugador4().turn == true && Jugador::GetJugador4().AnsweredBool == true)
 			{
-				if (Vdeck[1].color[1] == Vdeck[randPC].color[randNC] || Vdeck[1].numcard[1] == Vdeck[randPC].numcard[randNC])
-				{
-					if (clickflagbot1[1] == 0)
-					{
-						cardmid_aux = cardmid;
-						cardmid = Vdeck[1];
-						randNC_aux = randNC;
-						randPC_aux = randPC;
-						randNC = 1;
-						randPC = 1;
-						turn++;
-						Vdeck[1].qcard = Vdeck[1].qcard - 1;
-						clickflagbot1[1] = 1;
-						cardflagbot1 = 1;
-						printf("Turno de bot 1\n");
-						cardStart = 1;
-					}
-
-				}
-			}
-			if (cardflagbot1 == 0)
-			{
-				if (Vdeck[1].color[2] == Vdeck[randPC].color[randNC] || Vdeck[1].numcard[2] == Vdeck[randPC].numcard[randNC])
-				{
-					if (clickflagbot1[2] == 0)
-					{
-						cardmid_aux = cardmid;
-						cardmid = Vdeck[1];
-						randNC_aux = randNC;
-						randPC_aux = randPC;
-						randNC = 2;
-						randPC = 1;
-						turn++;
-						Vdeck[1].qcard = Vdeck[1].qcard - 1;
-						clickflagbot1[2] = 1;
-						cardflagbot1 = 1;
-						printf("Turno de bot 1\n");
-						cardStart = 1;
-					}
-				}
-			}
-			if (cardflagbot1 == 0)
-			{
-				if (Vdeck[1].color[3] == Vdeck[randPC].color[randNC] || Vdeck[1].numcard[3] == Vdeck[randPC].numcard[randNC])
-				{
-					if (clickflagbot1[3] == 0)
-					{
-						cardmid_aux = cardmid;
-						cardmid = Vdeck[1];
-						randNC_aux = randNC;
-						randPC_aux = randPC;
-						randNC = 3;
-						randPC = 1;
-						turn++;
-						Vdeck[1].qcard = Vdeck[1].qcard - 1;
-						clickflagbot1[3] = 1;
-						cardflagbot1 = 1;
-						printf("Turno de bot 1\n");
-						cardStart = 1;
-					}
-
-				}
-			}
-			if (cardflagbot1 == 0)
-			{
-				if (Vdeck[1].color[4] == Vdeck[randPC].color[randNC] || Vdeck[1].numcard[4] == Vdeck[randPC].numcard[randNC])
-				{
-					if (clickflagbot1[4] == 0)
-					{
-						cardmid_aux = cardmid;
-						cardmid = Vdeck[1];
-						randNC_aux = randNC;
-						randPC_aux = randPC;
-						randNC = 4;
-						randPC = 1;
-						turn++;
-						Vdeck[1].qcard = Vdeck[1].qcard - 1;
-						clickflagbot1[4] = 1;
-						cardflagbot1 = 1;
-						printf("Turno de bot 1\n");
-						cardStart = 1;
-					}
-
-				}
-			}
-			if (cardflagbot1 == 0)
-			{
-				if (Vdeck[1].color[5] == Vdeck[randPC].color[randNC] || Vdeck[1].numcard[5] == Vdeck[randPC].numcard[randNC])
-				{
-					if (clickflagbot1[5] == 0)
-					{
-						cardmid_aux = cardmid;
-						cardmid = Vdeck[1];
-						randNC_aux = randNC;
-						randPC_aux = randPC;
-						randNC = 5;
-						randPC = 1;
-						turn++;
-						Vdeck[1].qcard = Vdeck[1].qcard - 1;
-						clickflagbot1[5] = 1;
-						cardflagbot1 = 1;
-						printf("Turno de bot 1\n");
-						cardStart = 1;
-					}
-				}
-			}
-			if (cardflagbot1 == 0)
-			{
-				if (Vdeck[1].color[6] == Vdeck[randPC].color[randNC] || Vdeck[1].numcard[6] == Vdeck[randPC].numcard[randNC])
-				{
-					if (clickflagbot1 == 0)
-					{
-						cardmid_aux = cardmid;
-						cardmid = Vdeck[1];
-						randNC_aux = randNC;
-						randPC_aux = randPC;
-						randNC = 6;
-						randPC = 1;
-						turn++;
-						Vdeck[1].qcard = Vdeck[1].qcard - 1;
-						clickflagbot1[6] = 1;
-						cardflagbot1 = 1;
-						printf("Turno de bot 1\n");
-						cardStart = 1;
-					}
-
-				}
-			}
-
-			if (cardflagbot1 == 0)
-			{
-				turn++;
-			}
-
-		}
-
-
-		if (turn == 2)
-		{
-			if (cardStart == 1 && cardflagbot2 == 0 && ansbot2 == 2)
-			{
-				ansbot2 = cardOp(evento, queue, cardmid_aux.numcard[randNC_aux], cardmid_aux.color[randNC_aux], cardmid.numcard[randNC], cardmid.color[randNC], 0);
-				ans = 2;
-				ansbot1 = 2;
-				ansbot3 = 2;
-				ansbot2 = 1;
-			}
-
-			if (ansbot2 == 0)
-			{
-				cardflagbot2 = 1;
-				turn++;
-			}
-			Sleep(500);
-			if (cardflagbot2 == 0)
-			{
-				if (Vdeck[2].color[0] == Vdeck[randPC].color[randNC] || Vdeck[2].numcard[0] == Vdeck[randPC].numcard[randNC])
-				{
-					if (clickflagbot2[0] == 0)
-					{
-						cardmid_aux = cardmid;
-						cardmid = Vdeck[2];
-						randNC_aux = randNC;
-						randPC_aux = randPC;
-						randNC = 0;
-						randPC = 2;
-						turn++;
-						Vdeck[2].qcard = Vdeck[2].qcard - 1;
-						clickflagbot2[0] = 1;
-						cardflagbot2 = 1;
-						printf("Turno de bot 2\n");
-						cardStart = 1;
-					}
-				}
-			}
-			if (cardflagbot2 == 0)
-			{
-				if (Vdeck[2].color[1] == Vdeck[randPC].color[randNC] || Vdeck[2].numcard[1] == Vdeck[randPC].numcard[randNC])
-				{
-					if (clickflagbot2[1] == 0)
-					{
-						cardmid_aux = cardmid;
-						cardmid = Vdeck[2];
-						randNC_aux = randNC;
-						randPC_aux = randPC;
-						randNC = 1;
-						randPC = 2;
-						turn++;
-						Vdeck[2].qcard = Vdeck[2].qcard - 1;
-						clickflagbot2[1] = 1;
-						cardflagbot2 = 1;
-						printf("Turno de bot 2\n");
-						cardStart = 1;
-					}
-
-				}
-			}
-			if (cardflagbot2 == 0)
-			{
-				if (Vdeck[2].color[2] == Vdeck[randPC].color[randNC] || Vdeck[2].numcard[2] == Vdeck[randPC].numcard[randNC])
-				{
-					if (clickflagbot2[2] == 0)
-					{
-						cardmid_aux = cardmid;
-						cardmid = Vdeck[2];
-						randNC_aux = randNC;
-						randPC_aux = randPC;
-						randNC = 2;
-						randPC = 2;
-						turn++;
-						Vdeck[2].qcard = Vdeck[2].qcard - 1;
-						clickflagbot2[2] = 1;
-						cardflagbot2 = 1;
-						printf("Turno de bot 2\n");
-						cardStart = 1;
-					}
-				}
-			}
-			if (cardflagbot2 == 0)
-			{
-				if (Vdeck[2].color[3] == Vdeck[randPC].color[randNC] || Vdeck[2].numcard[3] == Vdeck[randPC].numcard[randNC])
-				{
-					if (clickflagbot2[3] == 0)
-					{
-						cardmid_aux = cardmid;
-						cardmid = Vdeck[2];
-						randNC_aux = randNC;
-						randPC_aux = randPC;
-						randNC = 3;
-						randPC = 2;
-						turn++;
-						Vdeck[2].qcard = Vdeck[2].qcard - 1;
-						clickflagbot2[3] = 1;
-						cardflagbot2 = 1;
-						printf("Turno de bot 2\n");
-						cardStart = 1;
-					}
-
-				}
-			}
-			if (cardflagbot2 == 0)
-			{
-				if (Vdeck[2].color[4] == Vdeck[randPC].color[randNC] || Vdeck[2].numcard[4] == Vdeck[randPC].numcard[randNC])
-				{
-					if (clickflagbot2[4] == 0)
-					{
-						cardmid_aux = cardmid;
-						cardmid = Vdeck[2];
-						randNC_aux = randNC;
-						randPC_aux = randPC;
-						randNC = 4;
-						randPC = 2;
-						turn++;
-						Vdeck[2].qcard = Vdeck[2].qcard - 1;
-						clickflagbot2[4] = 1;
-						cardflagbot2 = 1;
-						printf("Turno de bot 2\n");
-						cardStart = 1;
-					}
-
-				}
-			}
-			if (cardflagbot2 == 0)
-			{
-				if (Vdeck[2].color[5] == Vdeck[randPC].color[randNC] || Vdeck[2].numcard[5] == Vdeck[randPC].numcard[randNC])
-				{
-					if (clickflagbot2[5] == 0)
-					{
-						cardmid_aux = cardmid;
-						cardmid = Vdeck[2];
-						randNC_aux = randNC;
-						randPC_aux = randPC;
-						randNC = 5;
-						randPC = 2;
-						turn++;
-						Vdeck[2].qcard = Vdeck[2].qcard - 1;
-						clickflagbot2[5] = 1;
-						cardflagbot2 = 1;
-						printf("Turno de bot 2\n");
-						cardStart = 1;
-					}
-				}
-			}
-			if (cardflagbot2 == 0)
-			{
-				if (Vdeck[2].color[6] == Vdeck[randPC].color[randNC] || Vdeck[2].numcard[6] == Vdeck[randPC].numcard[randNC])
-				{
-					if (clickflagbot2 == 0)
-					{
-						cardmid_aux = cardmid;
-						cardmid = Vdeck[2];
-						randNC_aux = randNC;
-						randPC_aux = randPC;
-						randNC = 6;
-						randPC = 2;
-						turn++;
-						Vdeck[2].qcard = Vdeck[2].qcard - 1;
-						clickflagbot2[6] = 1;
-						cardflagbot2 = 1;
-						printf("Turno de bot 2\n");
-						cardStart = 1;
-					}
-
-				}
-			}
-
-			if (cardflagbot2 == 0)
-			{
-				turn++;
+				Jugador::GetJugador4().turn = false;
+				Jugador::GetJugador4().AnsweredBool = false;
 			}
 		}
-
-		if (turn == 3)
-		{
-
-			if (cardStart == 1 && cardflagbot3 == 0 && ansbot3 == 2)
-			{
-				ansbot3 = cardOp(evento, queue, cardmid_aux.numcard[randNC_aux], cardmid_aux.color[randNC_aux], cardmid.numcard[randNC], cardmid.color[randNC], 0);
-				ans = 2;
-				ansbot1 = 2;
-				ansbot2 = 2;
-				ansbot3 = 1;
-
-			}
-
-			if (ansbot3 == 0)
-			{
-				cardflagbot3 = 1;
-				turn++;
-			}
-
-			Sleep(500);
-			if (cardflagbot3 == 0)
-			{
-				if (Vdeck[3].color[0] == Vdeck[randPC].color[randNC] || Vdeck[3].numcard[0] == Vdeck[randPC].numcard[randNC])
-				{
-					if (clickflagbot3[0] == 0)
-					{
-						cardmid_aux = cardmid;
-						cardmid = Vdeck[3];
-						randNC_aux = randNC;
-						randPC_aux = randPC;
-						randNC = 0;
-						randPC = 3;
-						turn++;
-						Vdeck[3].qcard = Vdeck[3].qcard - 1;
-						clickflagbot3[0] = 1;
-						cardflagbot3 = 1;
-						printf("Turno de bot 3\n");
-						printf("%d %d %d\n", Vdeck[3].numcard[0], Vdeck[3].color[0], Vdeck[3].qcard);
-						cardStart = 1;
-					}
-				}
-			}
-			if (cardflagbot3 == 0)
-			{
-				if (Vdeck[3].color[1] == Vdeck[randPC].color[randNC] || Vdeck[3].numcard[1] == Vdeck[randPC].numcard[randNC])
-				{
-					if (clickflagbot3[1] == 0)
-					{
-						cardmid_aux = cardmid;
-						cardmid = Vdeck[3];
-						randNC_aux = randNC;
-						randPC_aux = randPC;
-						randNC = 1;
-						randPC = 3;
-						turn++;
-						Vdeck[3].qcard = Vdeck[3].qcard - 1;
-						clickflagbot3[1] = 1;
-						cardflagbot3 = 1;
-						printf("Turno de bot 3\n");
-						cardStart = 1;
-					}
-				}
-			}
-			if (cardflagbot3 == 0)
-			{
-				if (Vdeck[3].color[2] == Vdeck[randPC].color[randNC] || Vdeck[3].numcard[2] == Vdeck[randPC].numcard[randNC])
-				{
-					if (clickflagbot3[2] == 0)
-					{
-						cardmid_aux = cardmid;
-						cardmid = Vdeck[3];
-						randNC_aux = randNC;
-						randPC_aux = randPC;
-						randNC = 2;
-						randPC = 3;
-						turn++;
-						Vdeck[3].qcard = Vdeck[3].qcard - 1;
-						clickflagbot3[2] = 1;
-						cardflagbot3 = 1;
-						printf("Turno de bot 3\n");
-						cardStart = 1;
-					}
-				}
-			}
-			if (cardflagbot2 == 0)
-			{
-				if (Vdeck[3].color[3] == Vdeck[randPC].color[randNC] || Vdeck[3].numcard[3] == Vdeck[randPC].numcard[randNC])
-				{
-					if (clickflagbot3[3] == 0)
-					{
-						cardmid_aux = cardmid;
-						cardmid = Vdeck[3];
-						randNC_aux = randNC;
-						randPC_aux = randPC;
-						randNC = 3;
-						randPC = 3;
-						turn++;
-						Vdeck[3].qcard = Vdeck[3].qcard - 1;
-						clickflagbot3[3] = 1;
-						cardflagbot3 = 1;
-						printf("Turno de bot 3\n");
-						cardStart = 1;
-					}
-				}
-			}
-			if (cardflagbot3 == 0)
-			{
-				if (Vdeck[3].color[4] == Vdeck[randPC].color[randNC] || Vdeck[3].numcard[4] == Vdeck[randPC].numcard[randNC])
-				{
-					if (clickflagbot3[4] == 0)
-					{
-						cardmid_aux = cardmid;
-						cardmid = Vdeck[3];
-						randNC_aux = randNC;
-						randPC_aux = randPC;
-						randNC = 4;
-						randPC = 3;
-						turn++;
-						Vdeck[3].qcard = Vdeck[3].qcard - 1;
-						clickflagbot3[4] = 1;
-						cardflagbot3 = 1;
-						printf("Turno de bot 3\n");
-						cardStart = 1;
-					}
-				}
-			}
-			if (cardflagbot3 == 0)
-			{
-				if (Vdeck[3].color[5] == Vdeck[randPC].color[randNC] || Vdeck[3].numcard[5] == Vdeck[randPC].numcard[randNC])
-				{
-					if (clickflagbot3[5] == 0)
-					{
-						cardmid_aux = cardmid;
-						cardmid = Vdeck[3];
-						randNC_aux = randNC;
-						randPC_aux = randPC;
-						randNC = 5;
-						randPC = 3;
-						turn++;
-						Vdeck[3].qcard = Vdeck[3].qcard - 1;
-						clickflagbot3[5] = 1;
-						cardflagbot3 = 1;
-						printf("Turno de bot 3\n");
-						cardStart = 1;
-					}
-				}
-			}
-			if (cardflagbot3 == 0)
-			{
-				if (Vdeck[3].color[6] == Vdeck[randPC].color[randNC] || Vdeck[3].numcard[6] == Vdeck[randPC].numcard[randNC])
-				{
-					if (clickflagbot3[6] == 0)
-					{
-						cardmid_aux = cardmid;
-						cardmid = Vdeck[3];
-						randNC_aux = randNC;
-						randPC_aux = randPC;
-						randNC = 6;
-						randPC = 3;
-						turn++;
-						Vdeck[3].qcard = Vdeck[3].qcard - 1;
-						clickflagbot3[6] = 1;
-						cardflagbot3 = 1;
-						printf("Turno de bot 3\n");
-						cardStart = 1;
-					}
-				}
-			}
-			if (cardflagbot3 == 0)
-			{
-				turn++;
-			}
-		}
-		cardflag = 0;
-		cardflagbot1 = 0;
-		cardflagbot2 = 0;
-		cardflagbot3 = 0;
-		turn = 0;
-
-
-
-		if (playerDeck.qcard == 0 || Vdeck[1].qcard == 0 || Vdeck[2].qcard == 0 || Vdeck[3].qcard == 0)
+		if (Jugador::GetJugador1().Pdeck->CardsLeft == 0 || Jugador::GetJugador2().Pdeck->CardsLeft == 0 || Jugador::GetJugador3().Pdeck->CardsLeft == 0 || Jugador::GetJugador4().Pdeck->CardsLeft == 0)
 		{
 			int menu;
-			menu = gameover(evento, queue, playerDeck.qcard);
+			menu = GameOverMenu(evento, queue, Jugador::GetJugador1().Pdeck->CardsLeft);
 			if (menu == 1)
 			{
 				return 1;
@@ -1132,15 +976,250 @@ int menu::game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP*
 	}
 }
 
-int menu::OpMenu(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP* bg, deck midcard)
+bool menu::OpMenu(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, Card* prevcard, Card* ChoosenCard)
 {
+	//RandPosOp sera la posicion en la que estara la opcion correcta y randOpPow sera la operacion de las cartas negras
+	int i, randPosOp = rand() % 3, randOpPow = rand() % 3, Ans;
+	Ans = Operaciones(prevcard, ChoosenCard, randOpPow);
+	ALLEGRO_BITMAP* bg = al_load_bitmap("/Menus/OpMenu/menu_op.jpg");
+	vector <int> Opciones;
+	for (i = 0; i < 3; i++)
+	{
+		if (i == randPosOp)
+		{
+			Opciones.push_back(Ans);
+		}
+		else
+			Opciones.push_back(rand() % 81 + 1);
+	}
+
+
+
+	ALLEGRO_FONT* mine_font = al_load_font("Minecraftia-Regular.ttf", 50, NULL);
 	while (true)
 	{
 		al_wait_for_event(queue, &evento);
+		if (evento.type == ALLEGRO_EVENT_MOUSE_AXES || evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN)
+		{
+			//Posicion del mouse
+			printf("x: %d y: %d\n", x, y);
+			x = evento.mouse.x;
+			y = evento.mouse.y;
+		}
+
+		//Operacion segun el color de la carta del medio
+		if (prevcard->color == 1)
+		{
+			al_draw_text(mine_font, al_map_rgb(0, 0, 0), 640, 305, ALLEGRO_ALIGN_CENTER, "+");
+		}
+		else if (prevcard->color == 2)
+		{
+			al_draw_text(mine_font, al_map_rgb(0, 0, 0), 640, 305, ALLEGRO_ALIGN_CENTER, "-");
+		}
+		else if (prevcard->color == 3)
+		{
+			al_draw_text(mine_font, al_map_rgb(0, 0, 0), 640, 305, ALLEGRO_ALIGN_CENTER, "*");
+		}
+		else if (prevcard->color == 4)
+		{
+			al_draw_text(mine_font, al_map_rgb(0, 0, 0), 640, 305, ALLEGRO_ALIGN_CENTER, "/");
+		}
+		else if (prevcard->color == 5)
+		{
+			//Operacion aleatoria ya que las cartas son color negro, esto quiere decir que esa carta sera una exponencial.
+			if (randOpPow == 0)
+			{
+				al_draw_text(mine_font, al_map_rgb(0, 0, 0), 640, 305, ALLEGRO_ALIGN_CENTER, "+");
+			}
+			else if (randOpPow == 1)
+			{
+				al_draw_text(mine_font, al_map_rgb(0, 0, 0), 640, 305, ALLEGRO_ALIGN_CENTER, "-");
+			}
+			else if (randOpPow == 2)
+			{
+				al_draw_text(mine_font, al_map_rgb(0, 0, 0), 640, 305, ALLEGRO_ALIGN_CENTER, "*");
+			}
+		}
+
+
 		al_draw_bitmap(bg, 0, 0, 0);
 
-		al_draw_bitmap(midcard.deckcards[0], 0, 0, 0);
+		al_draw_bitmap(prevcard->asset_card, 360, 250, 0);
+		al_draw_bitmap(ChoosenCard->asset_card, 810, 250, 0);
 
+		al_draw_text(mine_font, al_map_rgb(0, 0, 0), 240, 560, ALLEGRO_ALIGN_CENTER, to_string(Opciones[0]).c_str());
+		al_draw_text(mine_font, al_map_rgb(0, 0, 0), 660, 560, ALLEGRO_ALIGN_CENTER, to_string(Opciones[1]).c_str());
+		al_draw_text(mine_font, al_map_rgb(0, 0, 0), 1050, 560, ALLEGRO_ALIGN_CENTER, to_string(Opciones[2]).c_str());
+		
+		if (Jugador::GetJugador1().turn == true)
+		{
+			al_draw_text(mine_font, al_map_rgb(250, 250, 250), 515, 145, NULL, "Tu turno!");
+			if (x >= 94 && x <= 390 && y >= 533 && y <= 650)
+			{
+				if (evento.mouse.button & 1)
+				{
+					if (Opciones[0] == Ans)
+					{
+						al_draw_text(mine_font, al_map_rgb(0, 0, 0), 640, 405, NULL, "Correcto!");
+						Sleep(1000);
+						return true;
+					}
+					else
+					{
+						al_draw_text(mine_font, al_map_rgb(0, 0, 0), 640, 405, NULL, "Incorrecto!");
+						Sleep(1000);
+						return false;
+					}
+
+				}
+			}
+
+			if (x >= 510 && x <= 804 && y >= 530 && y <= 645)
+			{
+				if (evento.mouse.button & 1)
+				{
+					if (Opciones[1] == Ans)
+					{
+						al_draw_text(mine_font, al_map_rgb(0, 0, 0), 640, 405, NULL, "Correcto!");
+						Sleep(1000);
+						return true;
+					}
+					else
+					{
+						al_draw_text(mine_font, al_map_rgb(0, 0, 0), 640, 405, NULL, "Incorrecto!");
+						Sleep(1000);
+						return false;
+					}
+				}
+			}
+
+			if (x >= 900 && x <= 1195 && y >= 525 && y <= 645)
+			{
+				if (evento.mouse.button & 1)
+				{
+					if (Opciones[3] == Ans)
+					{
+						al_draw_text(mine_font, al_map_rgb(0, 0, 0), 640, 405, NULL, "Correcto!");
+						Sleep(1000);
+						return true;
+					}
+					else
+					{
+						al_draw_text(mine_font, al_map_rgb(0, 0, 0), 640, 405, NULL, "Incorrecto!");
+						Sleep(1000);
+						return false;
+					}
+				}
+			}
+		}
+		else
+		{
+			al_draw_text(mine_font, al_map_rgb(250, 250, 250), 515, 145, NULL, "Turno del bot!");
+			if (Opciones[rand() % 3] == Ans)
+			{
+				Sleep(1000);
+				return true;
+			}
+			else
+			{
+				Sleep(1000);
+				return false;
+			}
+
+		}
+		
 	}
-	return 0;
+}
+
+int menu::Operaciones(Card* midcard, Card* ChoosenCard, int randOp)
+{
+	int ans;
+	if (midcard->color == 1)
+	{
+		ans = midcard->numcard + ChoosenCard->numcard;
+		return ans;
+	}
+	else if (midcard->color == 2)
+	{
+		ans = midcard->numcard - ChoosenCard->numcard;
+		return ans;
+	}
+	else if (midcard->color == 3)
+	{
+		ans = midcard->numcard * ChoosenCard->numcard;
+		return ans;
+	}
+	else if (midcard->color == 4)
+	{
+		ans = midcard->numcard / ChoosenCard->numcard;
+		return ans;
+	}
+	else if (midcard->color == 5)
+	{
+		if (randOp == 0)
+		{
+			ans = pow(midcard->numcard, 2) + ChoosenCard->numcard;
+			return ans;
+		}
+		else if (randOp == 1)
+		{
+			ans = pow(midcard->numcard, 2) - ChoosenCard->numcard;
+			return ans;
+		}
+		else if (randOp == 2)
+		{
+			ans = pow(midcard->numcard, 2) * ChoosenCard->numcard;
+			return ans;
+		}
+	}
+}
+
+int menu::GameOverMenu(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, int qcards)
+{
+	printf("Se a acabado el juego!");
+	int x = -1, y = -1;
+	ALLEGRO_FONT* mine_font = al_load_font("Minecraftia-Regular.ttf", 50, NULL);
+	ALLEGRO_BITMAP* gameover_null_win = al_load_bitmap("Menus/GameOverMenu/GameOverMenuWin0.jpg");
+	ALLEGRO_BITMAP* gameover_play_win = al_load_bitmap("Menus/GameOverMenu/GameOverMenuWin1.jpg");
+	ALLEGRO_BITMAP* gameover_menu_win = al_load_bitmap("Menus/GameOverMenu/GameOverMenuWin2.jpg");
+	ALLEGRO_BITMAP* gameover_null_lose = al_load_bitmap("Menus/GameOverMenu/GameOverMenuLose0.jpg");
+	ALLEGRO_BITMAP* gameover_play_lose = al_load_bitmap("Menus/GameOverMenu/GameOverMenuLose1.jpg");
+	ALLEGRO_BITMAP* gameover_menu_lose = al_load_bitmap("Menus/GameOverMenu/GameOverMenuLose2.jpg");
+
+	while (true)
+	{
+		al_wait_for_event(queue, &evento);
+		if (evento.type == ALLEGRO_EVENT_MOUSE_AXES || evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN)
+		{
+			//Posicion del mouse
+			x = evento.mouse.x;
+			y = evento.mouse.y;
+		}
+
+		if (qcards == 0)
+		{
+			al_draw_bitmap(gameover_null_win, 0, 0, 0);
+			if (x >= 640 && x <= 804 && y >= 305 && y <= 405)
+			{
+				if (evento.mouse.button & 1)
+				{
+					return 1;
+				}
+			}
+		}
+		else
+		{
+			al_draw_bitmap(gameover_null_lose, 0, 0, 0);
+			if (x >= 640 && x <= 804 && y >= 305 && y <= 405)
+			{
+				if (evento.mouse.button & 1)
+				{
+					return 1;
+				}
+			}
+		}
+
+		
+		al_flip_display();
+	}
 }
