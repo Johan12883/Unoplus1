@@ -18,7 +18,9 @@ public:
 	int ancho = 1280;
 	int alto = 720;
 
-	int x = -1, y = -1;
+	ALLEGRO_EVENT evento;
+	int x = 0, y = 0;
+
 	int seg = 0;
 	int difficulty = 0;
 	// Jugar, Opciones, Salir
@@ -30,10 +32,10 @@ public:
 	menu();
 
 	int initMenu(int ancho, int alto);
-	int diffmenu(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP* menu_null, ALLEGRO_BITMAP* menu_0, ALLEGRO_BITMAP* menu_1, ALLEGRO_BITMAP* menu_2);
-	int game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP* bg, int difficulty);
-	bool OpMenu(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, Card* midcard, Card* ChoosenCard);
+	int diffmenu(ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP* menu_null, ALLEGRO_BITMAP* menu_0, ALLEGRO_BITMAP* menu_1, ALLEGRO_BITMAP* menu_2);
+	int game(ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP* bg, int difficulty);
+	bool OpMenu(ALLEGRO_EVENT_QUEUE* queue, Card* midcard, Card* ChoosenCard);
 	int Operaciones(Card* midcard, Card* ChoosenCard, int randOp);
-	int GameOverMenu(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, int qcards);
+	int GameOverMenu(ALLEGRO_EVENT_QUEUE* queue, int qcards);
 };
 

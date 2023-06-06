@@ -25,6 +25,7 @@ menu::menu()
 
 int menu::initMenu(int ancho, int alto)
 {
+
 	if (!al_init())
 	{
 		al_show_native_message_box(NULL, "ERROR", "ERROR 404", "El programa no pudo cargar correctamente", NULL, ALLEGRO_MESSAGEBOX_ERROR);
@@ -53,7 +54,6 @@ int menu::initMenu(int ancho, int alto)
 
 
 	ALLEGRO_TIMER* segTimer = al_create_timer(1.0);
-	ALLEGRO_EVENT evento;
 	ALLEGRO_EVENT_QUEUE* queue = al_create_event_queue();
 
 	al_register_event_source(queue, al_get_timer_event_source(segTimer));
@@ -87,8 +87,8 @@ int menu::initMenu(int ancho, int alto)
 				if (evento.mouse.button & 1)
 				{
 					cout << "x: " << x << "y: " << y << endl;
-					difficulty = diffmenu(evento, queue, diff_menu0, diff_menu1, diff_menu2, diff_menu3); //Aca entrará a la funcion para jugar
-					game(evento, queue, background, difficulty);
+					difficulty = diffmenu(queue, diff_menu0, diff_menu1, diff_menu2, diff_menu3); //Aca entrará a la funcion para jugar
+					game(queue, background, difficulty);
 				}
 				else
 				{
@@ -152,10 +152,8 @@ int menu::initMenu(int ancho, int alto)
 	}
 }
 
-int menu::diffmenu(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP* menu_null, ALLEGRO_BITMAP* menu_0, ALLEGRO_BITMAP* menu_1, ALLEGRO_BITMAP* menu_2)
+int menu::diffmenu(ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP* menu_null, ALLEGRO_BITMAP* menu_0, ALLEGRO_BITMAP* menu_1, ALLEGRO_BITMAP* menu_2)
 {
-	int x = -1, y = -1;
-	ALLEGRO_COLOR negro = al_map_rgb(0, 0, 0);
 	while (true)
 	{
 		al_wait_for_event(queue, &evento);
@@ -167,7 +165,8 @@ int menu::diffmenu(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BIT
 			//Posicion del mouse
 			x = evento.mouse.x;
 			y = evento.mouse.y;
-			cout << "x: " << x << "y: " << y << endl;
+			cout << "x: " << x << " y: " << y << endl;
+
 			if (x >= 74 && x <= 382 && y >= 435 && y <= 527)
 			{
 				if (evento.mouse.button & 1)
@@ -221,18 +220,15 @@ int menu::diffmenu(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BIT
 
 
 
-int menu::game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP* bg, int difficulty)
+int menu::game(ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP* bg, int difficulty)
 {
+	srand(time(NULL));
 	Jugador::GetJugador1().Pdeck = Jugador::GetJugador1().Pdeck->genDeck(difficulty);
 	Jugador::GetJugador2().Pdeck = Jugador::GetJugador1().Pdeck->genDeck(difficulty);
 	Jugador::GetJugador3().Pdeck = Jugador::GetJugador1().Pdeck->genDeck(difficulty);
 	Jugador::GetJugador4().Pdeck = Jugador::GetJugador1().Pdeck->genDeck(difficulty);
-	srand(time(NULL));
 	int colorRand, numCard;
 	bool StartGame = true;
-
-	int x = -1, y = -1;
-
 
 	//Carga de bitmaps
 	ALLEGRO_BITMAP* engr = al_load_bitmap("Menus/engranaje.png");
@@ -262,6 +258,8 @@ int menu::game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP*
 	Card* prevcard = new Card;
 	Card* cardmid = new Card(colorRand, numCard);
 	cardmid->asset_card = cardmid->genCard(difficulty, colorRand, numCard);
+	Jugador::GetJugador1().turn = true;
+	Jugador::GetJugador1().AnsweredBool = true;
 	while (true)
 	{
 
@@ -272,53 +270,63 @@ int menu::game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP*
 		al_draw_bitmap(cardmid->asset_card, 580, 260, 0);
 
 		//Dibuja los reversos de las cartas
-		int i, j, xB = -1, yB = -1;
-		for (i = 0; i < 3; i++)
-		{
-			for (j = 0; j < 7; j++)
-			{
-				if (i == 0)
-				{
-					if (j == 0)
-						yB = 110;
-					x = 0;
-					al_draw_bitmap(revder, xB, yB, 0);
-					yB += 60;
-				}
-				else if (i == 1)
-				{
-					if (j == 0)
-						yB = 110;
-					xB = 1200;
-					al_draw_bitmap(revizq, xB, yB, 0);
-					yB += 60;
-				}
-				else if (i == 2)
-				{
-					if (j == 0)
-						xB = 420;
-					yB = 0;
-					al_draw_bitmap(revrev, xB, yB, 0);
-					xB += 60;
-				}
-			}
-		}
-		
-		//Dibuja las cartas del jugador
-		int xP = 100, yP = 535;
-		for (i = 0; i < 6; i++)
-		{
-			if (Jugador::GetJugador1().Pdeck->CardsFlags[i] == true)
-			{
-				al_draw_bitmap(Jugador::GetJugador1().Pdeck->deckcards.at(i)->asset_card, xP, yP, 0);
-				xP += 140;
-			}
-			// Y, en tal caso que haya usado esa carta, se pondra el reverso de la carta y se
-			//deshablilitara su uso
-			else
-				al_draw_bitmap(backcard, xP, yP, 0);
 
-		}
+		al_draw_bitmap(revder, 0, 110, 0);
+		al_draw_bitmap(revder, 0, 170, 0);
+		al_draw_bitmap(revder, 0, 230, 0);
+		al_draw_bitmap(revder, 0, 290, 0);
+		al_draw_bitmap(revder, 0, 350, 0);
+		al_draw_bitmap(revder, 0, 410, 0);
+		al_draw_bitmap(revder, 0, 470, 0);
+		al_draw_bitmap(revizq, 1200, 110, 0);
+		al_draw_bitmap(revizq, 1200, 170, 0);
+		al_draw_bitmap(revizq, 1200, 230, 0);
+		al_draw_bitmap(revizq, 1200, 290, 0);
+		al_draw_bitmap(revizq, 1200, 350, 0);
+		al_draw_bitmap(revizq, 1200, 410, 0);
+		al_draw_bitmap(revizq, 1200, 470, 0);
+		al_draw_bitmap(revrev, 420, 0, 0);
+		al_draw_bitmap(revrev, 480, 0, 0);
+		al_draw_bitmap(revrev, 540, 0, 0);
+		al_draw_bitmap(revrev, 600, 0, 0);
+		al_draw_bitmap(revrev, 660, 0, 0);
+		al_draw_bitmap(revrev, 720, 0, 0);
+		al_draw_bitmap(revrev, 780, 0, 0);
+		
+				//Dibuja las cartas del jugador
+		if (Jugador::GetJugador1().Pdeck->CardsFlags[0] == true)
+			al_draw_bitmap(Jugador::GetJugador1().Pdeck->deckcards.at(0)->asset_card, 100, 535, 0);
+		else
+			al_draw_bitmap(backcard, 100, 535, 0);
+
+		if (Jugador::GetJugador1().Pdeck->CardsFlags[1] == true)
+			al_draw_bitmap(Jugador::GetJugador1().Pdeck->deckcards.at(1)->asset_card, 240, 535, 0);
+		else
+			al_draw_bitmap(backcard, 240, 535, 0);
+
+		if (Jugador::GetJugador1().Pdeck->CardsFlags[2] == true)
+			al_draw_bitmap(Jugador::GetJugador1().Pdeck->deckcards.at(2)->asset_card, 380, 535, 0);
+		else
+			al_draw_bitmap(backcard, 380, 535, 0);
+
+		if (Jugador::GetJugador1().Pdeck->CardsFlags[3] == true)
+			al_draw_bitmap(Jugador::GetJugador1().Pdeck->deckcards.at(3)->asset_card, 520, 535, 0);
+		else
+			al_draw_bitmap(backcard, 520, 535, 0);
+
+		if (Jugador::GetJugador1().Pdeck->CardsFlags[4] == true)
+			al_draw_bitmap(Jugador::GetJugador1().Pdeck->deckcards.at(4)->asset_card, 660, 535, 0);
+		else
+			al_draw_bitmap(backcard, 660, 535, 0);
+
+		if (Jugador::GetJugador1().Pdeck->CardsFlags[5] == true)
+			al_draw_bitmap(Jugador::GetJugador1().Pdeck->deckcards.at(5)->asset_card, 800, 535, 0);
+		else
+			al_draw_bitmap(backcard, 800, 535, 0);
+		if (Jugador::GetJugador1().Pdeck->CardsFlags[6] == true)
+			al_draw_bitmap(Jugador::GetJugador1().Pdeck->deckcards.at(6)->asset_card, 940, 535, 0);
+		else
+			al_draw_bitmap(backcard, 940, 535, 0);
 
 		//Dibuja obejtos del menu para las opciones y para pasar de turno
 		al_draw_bitmap(passCard, 980, 475, 0);
@@ -326,31 +334,34 @@ int menu::game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP*
 
 		if (evento.type == ALLEGRO_EVENT_MOUSE_AXES || evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN)
 		{
+
 			//Posicion del mouse
 			x = evento.mouse.x;
 			y = evento.mouse.y;
-
 			cout << "x: " << x << " y: " << y << endl;
+		}
 
-			Jugador::GetJugador1().turn = true;
 			if (Jugador::GetJugador1().turn == true)
 			{
+				//Si el juego no acaba de empezar(o si nadie a lanzado una carta antes) este tendra que responder a la operacion segun las dos ultimas cartas de en medio
 				if (StartGame == false && Jugador::GetJugador1().AnsweredBool == false)
 				{
-					Jugador::GetJugador1().AnsweredBool = OpMenu(evento, queue, cardmid, prevcard);
-				}
-
+					Jugador::GetJugador1().AnsweredBool = OpMenu(queue, cardmid, prevcard);
+				}		
+				//Si el jugador se equivoca al contestar la operacion, la variable AnsweredBool sera falsa y pasara turno al siguiente jugador
 				if (Jugador::GetJugador1().AnsweredBool == false)
 				{
 					Jugador::GetJugador1().turn = false;
+					Jugador::GetJugador2().turn = true;
 				}
-
+				//Boton para pasar de turno al siguiente jugador.
 				if (x >= 980 && x <= 1028 && y >= 475 && y <= 515)
 				{
 					if (evento.mouse.button & 1)
 					{
 						Jugador::GetJugador1().turn = false;
 						Jugador::GetJugador1().AnsweredBool = false;
+						Jugador::GetJugador2().turn = true;
 						printf("A saltado turno!\n");
 					}
 				}
@@ -366,17 +377,24 @@ int menu::game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP*
 							{
 								if (Jugador::GetJugador1().Pdeck->deckcards.at(0)->color == cardmid->color || Jugador::GetJugador1().Pdeck->deckcards.at(0)->numcard == cardmid->numcard)
 								{
-									//midcard en la funcion de OpMenu
+									//Ponemos que la variable prevcard es igual a la variable cardmid para que esta guarde antes de que cardmid cambie
+									//prevcard es midcard en la funcion de OpMenu
 									prevcard = cardmid;
-									//ChoosenCard en la funcion OpMenu
+									//cardmid cambia a la carta del jugador que presiono.
+									//cardmid es ChoosenCard en la funcion OpMenu
 									cardmid = Jugador::GetJugador1().Pdeck->deckcards.at(0);
+									//Al lanzar esta carta, quiere decir que ya no la tienes, entonces el vector 0 de CardsFlags sera falso para no volver a lanzarla
 									Jugador::GetJugador1().Pdeck->CardsFlags[0] = false;
 									Jugador::GetJugador1().turn = false;
+									//Las cartas faltantes tambien cambian, esta se disminuira para tener registro de quien gana y quien no.
 									Jugador::GetJugador1().Pdeck->CardsLeft = Jugador::GetJugador1().Pdeck->CardsLeft - 1;
+									//La variable AnsweredBool se cambia a false para que responda otra operacion al ser su turno de nuevo
 									Jugador::GetJugador1().AnsweredBool = false;
+									//Si el juego acaba de empezar, la variable StartGame sera falsa, indicando que ya hay mas de una carta para poder realizar la pregunta de operaciones
 									if (StartGame == true)
 										StartGame = false;
-
+									Jugador::GetJugador2().turn = true;
+									cout << "Hola" << endl;
 								}
 							}
 						}
@@ -403,6 +421,7 @@ int menu::game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP*
 									Jugador::GetJugador1().AnsweredBool = false;
 									if (StartGame == true)
 										StartGame = false;
+									Jugador::GetJugador2().turn = true;
 								}
 							}
 						}
@@ -428,6 +447,7 @@ int menu::game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP*
 									Jugador::GetJugador1().AnsweredBool = false;
 									if (StartGame == true)
 										StartGame = false;
+									Jugador::GetJugador2().turn = true;
 								}
 							}
 						}
@@ -452,6 +472,7 @@ int menu::game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP*
 									Jugador::GetJugador1().AnsweredBool = false;
 									if (StartGame == true)
 										StartGame = false;
+									Jugador::GetJugador2().turn = true;
 								}
 							}
 						}
@@ -476,6 +497,7 @@ int menu::game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP*
 									Jugador::GetJugador1().AnsweredBool = false;
 									if (StartGame == true)
 										StartGame = false;
+									Jugador::GetJugador2().turn = true;
 								}
 							}
 
@@ -501,6 +523,7 @@ int menu::game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP*
 									Jugador::GetJugador1().AnsweredBool = false;
 									if (StartGame == true)
 										StartGame = false;
+									Jugador::GetJugador2().turn = true;
 								}
 							}
 
@@ -528,48 +551,51 @@ int menu::game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP*
 									Jugador::GetJugador1().AnsweredBool = false;
 									if (StartGame == true)
 										StartGame = false;
+									Jugador::GetJugador2().turn = true;
 								}
 							}
 						}
 					}
 				}
+			
+		}
+
+		if (Jugador::GetJugador2().turn == true)
+		{
+			//Si el juego no acaba de empezar(o si nadie a lanzado una carta antes) este tendra que responder a la operacion segun las dos ultimas cartas de en medio
+			if (StartGame == false && Jugador::GetJugador2().AnsweredBool == false)
+			{
+				Jugador::GetJugador2().AnsweredBool = OpMenu(queue, cardmid, prevcard);
+			}
+			//Si el bot se equivoca al contestar la operacion, la variable AnsweredBool sera falsa y pasara turno al siguiente jugador
+			if (Jugador::GetJugador2().AnsweredBool == false)
+			{
+				Jugador::GetJugador2().turn = false;
+				Jugador::GetJugador3().turn = true;
 			}
 
-			Jugador::GetJugador2().turn = true;
 			if (Jugador::GetJugador2().turn == true)
 			{
-				if (StartGame == false && Jugador::GetJugador2().AnsweredBool == false)
+				if (Jugador::GetJugador2().Pdeck->CardsFlags[0] == true)
 				{
-					Jugador::GetJugador2().AnsweredBool = OpMenu(evento, queue, cardmid, prevcard);
+					if (Jugador::GetJugador2().Pdeck->deckcards.at(0)->color == cardmid->color || Jugador::GetJugador2().Pdeck->deckcards.at(0)->numcard == cardmid->numcard)
+					{
+						//midcard en la funcion de OpMenu
+						prevcard = cardmid;
+						//ChoosenCard en la funcion OpMenu
+						cardmid = Jugador::GetJugador2().Pdeck->deckcards.at(0);
+						Jugador::GetJugador2().Pdeck->CardsFlags[0] = false;
+						Jugador::GetJugador2().turn = false;
+						Jugador::GetJugador2().Pdeck->CardsLeft = Jugador::GetJugador2().Pdeck->CardsLeft - 1;
+						Jugador::GetJugador2().AnsweredBool = false;
+						if (StartGame == true)
+							StartGame = false;
+						Jugador::GetJugador3().turn = true;
+					}
 				}
 
-				if (Jugador::GetJugador2().AnsweredBool == false)
-				{
-					Jugador::GetJugador2().turn = false;
-				}
-
-				Sleep(500);
 				if (Jugador::GetJugador2().turn == true)
 				{
-					if (Jugador::GetJugador2().Pdeck->CardsFlags[0] == true)
-					{
-						if (Jugador::GetJugador2().Pdeck->deckcards.at(0)->color == cardmid->color || Jugador::GetJugador2().Pdeck->deckcards.at(0)->numcard == cardmid->numcard)
-						{
-							//midcard en la funcion de OpMenu
-							prevcard = cardmid;
-							//ChoosenCard en la funcion OpMenu
-							cardmid = Jugador::GetJugador2().Pdeck->deckcards.at(0);
-							Jugador::GetJugador2().Pdeck->CardsFlags[0] = false;
-							Jugador::GetJugador2().turn = false;
-							Jugador::GetJugador2().Pdeck->CardsLeft = Jugador::GetJugador2().Pdeck->CardsLeft - 1;
-							Jugador::GetJugador2().AnsweredBool = false;
-							if (StartGame == true)
-								StartGame = false;
-						}
-					}
-
-
-
 					if (Jugador::GetJugador2().Pdeck->CardsFlags[1] == true)
 					{
 						if (Jugador::GetJugador2().Pdeck->deckcards.at(1)->color == cardmid->color || Jugador::GetJugador2().Pdeck->deckcards.at(1)->numcard == cardmid->numcard)
@@ -584,10 +610,13 @@ int menu::game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP*
 							Jugador::GetJugador2().AnsweredBool = false;
 							if (StartGame == true)
 								StartGame = false;
+							Jugador::GetJugador3().turn = true;
 						}
 					}
+				}
 
-
+				if (Jugador::GetJugador2().turn == true)
+				{
 					if (Jugador::GetJugador2().Pdeck->CardsFlags[2] == true)
 					{
 						if (Jugador::GetJugador2().Pdeck->deckcards.at(2)->color == cardmid->color || Jugador::GetJugador2().Pdeck->deckcards.at(2)->numcard == cardmid->numcard)
@@ -602,9 +631,13 @@ int menu::game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP*
 							Jugador::GetJugador2().AnsweredBool = false;
 							if (StartGame == true)
 								StartGame = false;
+							Jugador::GetJugador3().turn = true;
 						}
 					}
+				}
 
+				if (Jugador::GetJugador2().turn == true)
+				{
 					if (Jugador::GetJugador2().Pdeck->CardsFlags[3] == true)
 					{
 						if (Jugador::GetJugador2().Pdeck->deckcards.at(3)->color == cardmid->color || Jugador::GetJugador2().Pdeck->deckcards.at(3)->numcard == cardmid->numcard)
@@ -619,9 +652,13 @@ int menu::game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP*
 							Jugador::GetJugador2().AnsweredBool = false;
 							if (StartGame == true)
 								StartGame = false;
+							Jugador::GetJugador3().turn = true;
 						}
 					}
+				}
 
+				if (Jugador::GetJugador2().turn == true)
+				{
 					if (Jugador::GetJugador2().Pdeck->CardsFlags[4] == true)
 					{
 						if (Jugador::GetJugador2().Pdeck->deckcards.at(4)->color == cardmid->color || Jugador::GetJugador2().Pdeck->deckcards.at(4)->numcard == cardmid->numcard)
@@ -636,9 +673,13 @@ int menu::game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP*
 							Jugador::GetJugador2().AnsweredBool = false;
 							if (StartGame == true)
 								StartGame = false;
+							Jugador::GetJugador3().turn = true;
 						}
 					}
+				}
 
+				if (Jugador::GetJugador2().turn == true)
+				{
 					if (Jugador::GetJugador2().Pdeck->CardsFlags[5] == true)
 					{
 						if (Jugador::GetJugador2().Pdeck->deckcards.at(5)->color == cardmid->color || Jugador::GetJugador2().Pdeck->deckcards.at(5)->numcard == cardmid->numcard)
@@ -653,10 +694,13 @@ int menu::game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP*
 							Jugador::GetJugador2().AnsweredBool = false;
 							if (StartGame == true)
 								StartGame = false;
+							Jugador::GetJugador3().turn = true;
 						}
 					}
+				}
 
-
+				if (Jugador::GetJugador2().turn == true)
+				{
 					if (Jugador::GetJugador2().Pdeck->CardsFlags[6] == true)
 					{
 						if (Jugador::GetJugador2().Pdeck->deckcards.at(6)->color == cardmid->color || Jugador::GetJugador2().Pdeck->deckcards.at(6)->numcard == cardmid->numcard)
@@ -671,52 +715,59 @@ int menu::game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP*
 							Jugador::GetJugador2().AnsweredBool = false;
 							if (StartGame == true)
 								StartGame = false;
+							Jugador::GetJugador3().turn = true;
 						}
 					}
 				}
 			}
+		}
+		//Si el turno del jugador es verdadero y AnsweredBool igual a este punto, quiere decir que no hay carta que pueda lanzar el bot
+		//por lo que se pasa turno cambiando las variables turn y AnsweredBool a false y el turno del siguiente jugador a true.
+		if (Jugador::GetJugador2().turn == true && Jugador::GetJugador2().AnsweredBool == true)
+		{
+			Jugador::GetJugador2().turn = false;
+			Jugador::GetJugador2().AnsweredBool = false;
+			Jugador::GetJugador3().turn = true;
+		}
 
-			if (Jugador::GetJugador2().turn == true && Jugador::GetJugador2().AnsweredBool == true)
+		if (Jugador::GetJugador3().turn == true)
+		{
+			//Si el juego no acaba de empezar(o si nadie a lanzado una carta antes) este tendra que responder a la operacion segun las dos ultimas cartas de en medio
+			if (StartGame == false && Jugador::GetJugador3().AnsweredBool == false)
 			{
-				Jugador::GetJugador2().turn = false;
-				Jugador::GetJugador2().AnsweredBool = false;
+				Jugador::GetJugador3().AnsweredBool = OpMenu(queue, cardmid, prevcard);
 			}
 
-			Jugador::GetJugador3().turn = true;
+			//Si el bot se equivoca al contestar la operacion, la variable AnsweredBool sera falsa y pasara turno al siguiente jugador
+			if (Jugador::GetJugador3().AnsweredBool == false)
+			{
+				Jugador::GetJugador3().turn = false;
+				Jugador::GetJugador4().turn = true;
+			}
+
 			if (Jugador::GetJugador3().turn == true)
 			{
-				if (StartGame == false && Jugador::GetJugador3().AnsweredBool == false)
+				if (Jugador::GetJugador3().Pdeck->CardsFlags[0] == true)
 				{
-					Jugador::GetJugador3().AnsweredBool = OpMenu(evento, queue, cardmid, prevcard);
+					if (Jugador::GetJugador3().Pdeck->deckcards.at(0)->color == cardmid->color || Jugador::GetJugador3().Pdeck->deckcards.at(0)->numcard == cardmid->numcard)
+					{
+						//midcard en la funcion de OpMenu
+						prevcard = cardmid;
+						//ChoosenCard en la funcion OpMenu
+						cardmid = Jugador::GetJugador3().Pdeck->deckcards.at(0);
+						Jugador::GetJugador3().Pdeck->CardsFlags[0] = false;
+						Jugador::GetJugador3().turn = false;
+						Jugador::GetJugador3().Pdeck->CardsLeft = Jugador::GetJugador3().Pdeck->CardsLeft - 1;
+						Jugador::GetJugador3().AnsweredBool = false;
+						if (StartGame == true)
+							StartGame = false;
+						Jugador::GetJugador4().turn = true;
+					}
 				}
 
-				if (Jugador::GetJugador3().AnsweredBool == false)
-				{
-					Jugador::GetJugador3().turn = false;
-				}
 
-				Sleep(500);
 				if (Jugador::GetJugador3().turn == true)
 				{
-					if (Jugador::GetJugador3().Pdeck->CardsFlags[0] == true)
-					{
-						if (Jugador::GetJugador3().Pdeck->deckcards.at(0)->color == cardmid->color || Jugador::GetJugador3().Pdeck->deckcards.at(0)->numcard == cardmid->numcard)
-						{
-							//midcard en la funcion de OpMenu
-							prevcard = cardmid;
-							//ChoosenCard en la funcion OpMenu
-							cardmid = Jugador::GetJugador3().Pdeck->deckcards.at(0);
-							Jugador::GetJugador3().Pdeck->CardsFlags[0] = false;
-							Jugador::GetJugador3().turn = false;
-							Jugador::GetJugador3().Pdeck->CardsLeft = Jugador::GetJugador3().Pdeck->CardsLeft - 1;
-							Jugador::GetJugador3().AnsweredBool = false;
-							if (StartGame == true)
-								StartGame = false;
-						}
-					}
-
-
-
 					if (Jugador::GetJugador3().Pdeck->CardsFlags[1] == true)
 					{
 						if (Jugador::GetJugador3().Pdeck->deckcards.at(1)->color == cardmid->color || Jugador::GetJugador3().Pdeck->deckcards.at(1)->numcard == cardmid->numcard)
@@ -731,10 +782,13 @@ int menu::game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP*
 							Jugador::GetJugador3().AnsweredBool = false;
 							if (StartGame == true)
 								StartGame = false;
+							Jugador::GetJugador4().turn = true;
 						}
 					}
+				}
 
-
+				if (Jugador::GetJugador3().turn == true)
+				{
 					if (Jugador::GetJugador3().Pdeck->CardsFlags[2] == true)
 					{
 						if (Jugador::GetJugador3().Pdeck->deckcards.at(2)->color == cardmid->color || Jugador::GetJugador3().Pdeck->deckcards.at(2)->numcard == cardmid->numcard)
@@ -749,9 +803,13 @@ int menu::game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP*
 							Jugador::GetJugador3().AnsweredBool = false;
 							if (StartGame == true)
 								StartGame = false;
+							Jugador::GetJugador4().turn = true;
 						}
 					}
+				}
 
+				if (Jugador::GetJugador3().turn == true)
+				{
 					if (Jugador::GetJugador3().Pdeck->CardsFlags[3] == true)
 					{
 						if (Jugador::GetJugador3().Pdeck->deckcards.at(3)->color == cardmid->color || Jugador::GetJugador3().Pdeck->deckcards.at(3)->numcard == cardmid->numcard)
@@ -766,9 +824,12 @@ int menu::game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP*
 							Jugador::GetJugador3().AnsweredBool = false;
 							if (StartGame == true)
 								StartGame = false;
+							Jugador::GetJugador4().turn = true;
 						}
 					}
-
+				}
+				if (Jugador::GetJugador3().turn == true)
+				{
 					if (Jugador::GetJugador3().Pdeck->CardsFlags[4] == true)
 					{
 						if (Jugador::GetJugador3().Pdeck->deckcards.at(4)->color == cardmid->color || Jugador::GetJugador3().Pdeck->deckcards.at(4)->numcard == cardmid->numcard)
@@ -783,9 +844,13 @@ int menu::game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP*
 							Jugador::GetJugador3().AnsweredBool = false;
 							if (StartGame == true)
 								StartGame = false;
+							Jugador::GetJugador4().turn = true;
 						}
 					}
+				}
 
+				if (Jugador::GetJugador3().turn == true)
+				{
 					if (Jugador::GetJugador3().Pdeck->CardsFlags[5] == true)
 					{
 						if (Jugador::GetJugador3().Pdeck->deckcards.at(5)->color == cardmid->color || Jugador::GetJugador3().Pdeck->deckcards.at(5)->numcard == cardmid->numcard)
@@ -800,10 +865,13 @@ int menu::game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP*
 							Jugador::GetJugador3().AnsweredBool = false;
 							if (StartGame == true)
 								StartGame = false;
+							Jugador::GetJugador4().turn = true;
 						}
 					}
+				}
 
-
+				if (Jugador::GetJugador3().turn == true)
+				{
 					if (Jugador::GetJugador3().Pdeck->CardsFlags[6] == true)
 					{
 						if (Jugador::GetJugador3().Pdeck->deckcards.at(6)->color == cardmid->color || Jugador::GetJugador3().Pdeck->deckcards.at(6)->numcard == cardmid->numcard)
@@ -818,40 +886,57 @@ int menu::game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP*
 							Jugador::GetJugador3().AnsweredBool = false;
 							if (StartGame == true)
 								StartGame = false;
+							Jugador::GetJugador4().turn = true;
 						}
 					}
 				}
 			}
+		}
 
-			if (Jugador::GetJugador4().turn == true && Jugador::GetJugador4().AnsweredBool == true)
+		//Si el turno del jugador es verdadero y AnsweredBool igual a este punto, quiere decir que no hay carta que pueda lanzar el bot
+		//por lo que se pasa turno cambiando las variables turn y AnsweredBool a false y el turno del siguiente jugador a true.
+		if (Jugador::GetJugador3().turn == true && Jugador::GetJugador3().AnsweredBool == true)
+		{
+			Jugador::GetJugador3().turn = false;
+			Jugador::GetJugador3().AnsweredBool = false;
+			Jugador::GetJugador4().turn = true;
+		}
+		//Si el juego no acaba de empezar(o si nadie a lanzado una carta antes) este tendra que responder a la operacion segun las dos ultimas cartas de en medio
+		if (StartGame == false && Jugador::GetJugador4().AnsweredBool == false)
+		{
+			Jugador::GetJugador4().AnsweredBool = OpMenu(queue, cardmid, prevcard);
+		}
+
+		//Si el bot se equivoca al contestar la operacion, la variable AnsweredBool sera falsa y pasara turno al siguiente jugador
+		if (Jugador::GetJugador4().AnsweredBool == false)
+		{
+			Jugador::GetJugador4().turn = false;
+			Jugador::GetJugador1().turn = true;
+		}
+
+		if (Jugador::GetJugador4().turn == true)
+		{
+			if (Jugador::GetJugador4().Pdeck->CardsFlags[0] == true)
 			{
-				Jugador::GetJugador4().turn = false;
-				Jugador::GetJugador4().AnsweredBool = false;
+				if (Jugador::GetJugador4().Pdeck->deckcards.at(0)->color == cardmid->color || Jugador::GetJugador4().Pdeck->deckcards.at(0)->numcard == cardmid->numcard)
+				{
+					//midcard en la funcion de OpMenu
+					prevcard = cardmid;
+					//ChoosenCard en la funcion OpMenu
+					cardmid = Jugador::GetJugador4().Pdeck->deckcards.at(0);
+					Jugador::GetJugador4().Pdeck->CardsFlags[0] = false;
+					Jugador::GetJugador4().turn = false;
+					Jugador::GetJugador4().Pdeck->CardsLeft = Jugador::GetJugador4().Pdeck->CardsLeft - 1;
+					Jugador::GetJugador4().AnsweredBool = false;
+					if (StartGame == true)
+						StartGame = false;
+					Jugador::GetJugador1().turn = true;
+				}
 			}
 
 
-			Sleep(500);
 			if (Jugador::GetJugador4().turn == true)
 			{
-				if (Jugador::GetJugador4().Pdeck->CardsFlags[0] == true)
-				{
-					if (Jugador::GetJugador4().Pdeck->deckcards.at(0)->color == cardmid->color || Jugador::GetJugador4().Pdeck->deckcards.at(0)->numcard == cardmid->numcard)
-					{
-						//midcard en la funcion de OpMenu
-						prevcard = cardmid;
-						//ChoosenCard en la funcion OpMenu
-						cardmid = Jugador::GetJugador4().Pdeck->deckcards.at(0);
-						Jugador::GetJugador4().Pdeck->CardsFlags[0] = false;
-						Jugador::GetJugador4().turn = false;
-						Jugador::GetJugador4().Pdeck->CardsLeft = Jugador::GetJugador4().Pdeck->CardsLeft - 1;
-						Jugador::GetJugador4().AnsweredBool = false;
-						if (StartGame == true)
-							StartGame = false;
-					}
-				}
-
-
-
 				if (Jugador::GetJugador4().Pdeck->CardsFlags[1] == true)
 				{
 					if (Jugador::GetJugador4().Pdeck->deckcards.at(1)->color == cardmid->color || Jugador::GetJugador4().Pdeck->deckcards.at(1)->numcard == cardmid->numcard)
@@ -866,10 +951,13 @@ int menu::game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP*
 						Jugador::GetJugador4().AnsweredBool = false;
 						if (StartGame == true)
 							StartGame = false;
+						Jugador::GetJugador1().turn = true;
 					}
 				}
+			}
 
-
+			if (Jugador::GetJugador4().turn == true)
+			{
 				if (Jugador::GetJugador4().Pdeck->CardsFlags[2] == true)
 				{
 					if (Jugador::GetJugador4().Pdeck->deckcards.at(2)->color == cardmid->color || Jugador::GetJugador4().Pdeck->deckcards.at(2)->numcard == cardmid->numcard)
@@ -884,26 +972,31 @@ int menu::game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP*
 						Jugador::GetJugador4().AnsweredBool = false;
 						if (StartGame == true)
 							StartGame = false;
+						Jugador::GetJugador1().turn = true;
 					}
 				}
+			}
 
-				if (Jugador::GetJugador4().Pdeck->CardsFlags[3] == true)
+			if (Jugador::GetJugador4().Pdeck->CardsFlags[3] == true)
+			{
+				if (Jugador::GetJugador4().Pdeck->deckcards.at(3)->color == cardmid->color || Jugador::GetJugador4().Pdeck->deckcards.at(3)->numcard == cardmid->numcard)
 				{
-					if (Jugador::GetJugador4().Pdeck->deckcards.at(3)->color == cardmid->color || Jugador::GetJugador4().Pdeck->deckcards.at(3)->numcard == cardmid->numcard)
-					{
-						//midcard en la funcion de OpMenu
-						prevcard = cardmid;
-						//ChoosenCard en la funcion OpMenu
-						cardmid = Jugador::GetJugador4().Pdeck->deckcards.at(3);
-						Jugador::GetJugador4().Pdeck->CardsFlags[3] = false;
-						Jugador::GetJugador4().turn = false;
-						Jugador::GetJugador4().Pdeck->CardsLeft = Jugador::GetJugador4().Pdeck->CardsLeft - 1;
-						Jugador::GetJugador4().AnsweredBool = false;
-						if (StartGame == true)
-							StartGame = false;
-					}
+					//midcard en la funcion de OpMenu
+					prevcard = cardmid;
+					//ChoosenCard en la funcion OpMenu
+					cardmid = Jugador::GetJugador4().Pdeck->deckcards.at(3);
+					Jugador::GetJugador4().Pdeck->CardsFlags[3] = false;
+					Jugador::GetJugador4().turn = false;
+					Jugador::GetJugador4().Pdeck->CardsLeft = Jugador::GetJugador4().Pdeck->CardsLeft - 1;
+					Jugador::GetJugador4().AnsweredBool = false;
+					if (StartGame == true)
+						StartGame = false;
+					Jugador::GetJugador1().turn = true;
 				}
+			}
 
+			if (Jugador::GetJugador4().turn == true)
+			{
 				if (Jugador::GetJugador4().Pdeck->CardsFlags[4] == true)
 				{
 					if (Jugador::GetJugador4().Pdeck->deckcards.at(4)->color == cardmid->color || Jugador::GetJugador4().Pdeck->deckcards.at(4)->numcard == cardmid->numcard)
@@ -918,9 +1011,13 @@ int menu::game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP*
 						Jugador::GetJugador4().AnsweredBool = false;
 						if (StartGame == true)
 							StartGame = false;
+						Jugador::GetJugador1().turn = true;
 					}
 				}
+			}
 
+			if (Jugador::GetJugador4().turn == true)
+			{
 				if (Jugador::GetJugador4().Pdeck->CardsFlags[5] == true)
 				{
 					if (Jugador::GetJugador4().Pdeck->deckcards.at(5)->color == cardmid->color || Jugador::GetJugador4().Pdeck->deckcards.at(5)->numcard == cardmid->numcard)
@@ -935,10 +1032,13 @@ int menu::game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP*
 						Jugador::GetJugador4().AnsweredBool = false;
 						if (StartGame == true)
 							StartGame = false;
+						Jugador::GetJugador1().turn = true;
 					}
 				}
+			}
 
-
+			if (Jugador::GetJugador4().turn == true)
+			{
 				if (Jugador::GetJugador4().Pdeck->CardsFlags[6] == true)
 				{
 					if (Jugador::GetJugador4().Pdeck->deckcards.at(6)->color == cardmid->color || Jugador::GetJugador4().Pdeck->deckcards.at(6)->numcard == cardmid->numcard)
@@ -953,19 +1053,24 @@ int menu::game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP*
 						Jugador::GetJugador4().AnsweredBool = false;
 						if (StartGame == true)
 							StartGame = false;
+						Jugador::GetJugador1().turn = true;
 					}
 				}
 			}
-			if (Jugador::GetJugador4().turn == true && Jugador::GetJugador4().AnsweredBool == true)
-			{
-				Jugador::GetJugador4().turn = false;
-				Jugador::GetJugador4().AnsweredBool = false;
-			}
 		}
+		//Si el turno del jugador es verdadero y AnsweredBool igual a este punto, quiere decir que no hay carta que pueda lanzar el bot
+		//por lo que se pasa turno cambiando las variables turn y AnsweredBool a false y el turno del siguiente jugador a true.
+		if (Jugador::GetJugador4().turn == true && Jugador::GetJugador4().AnsweredBool == true)
+		{
+			Jugador::GetJugador4().turn = false;
+			Jugador::GetJugador4().AnsweredBool = false;
+			Jugador::GetJugador1().turn = true;
+		}
+
 		if (Jugador::GetJugador1().Pdeck->CardsLeft == 0 || Jugador::GetJugador2().Pdeck->CardsLeft == 0 || Jugador::GetJugador3().Pdeck->CardsLeft == 0 || Jugador::GetJugador4().Pdeck->CardsLeft == 0)
 		{
 			int menu;
-			menu = GameOverMenu(evento, queue, Jugador::GetJugador1().Pdeck->CardsLeft);
+			menu = GameOverMenu(queue, Jugador::GetJugador1().Pdeck->CardsLeft);
 			if (menu == 1)
 			{
 				return 1;
@@ -976,13 +1081,16 @@ int menu::game(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP*
 	}
 }
 
-bool menu::OpMenu(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, Card* prevcard, Card* ChoosenCard)
+bool menu::OpMenu(ALLEGRO_EVENT_QUEUE* queue, Card* prevcard, Card* ChoosenCard)
 {
 	//RandPosOp sera la posicion en la que estara la opcion correcta y randOpPow sera la operacion de las cartas negras
 	int i, randPosOp = rand() % 3, randOpPow = rand() % 3, Ans;
+	//Ans es la respuesta de la operacion segun la carta anterior y la carta elegida.
 	Ans = Operaciones(prevcard, ChoosenCard, randOpPow);
-	ALLEGRO_BITMAP* bg = al_load_bitmap("/Menus/OpMenu/menu_op.jpg");
+	ALLEGRO_BITMAP* bg = al_load_bitmap("Menus/OpMenu/menu_op.jpg");
+	//Vector para almacenar los numeros para dar a elegir.
 	vector <int> Opciones;
+	//Aqui se utiliza la variable randPosOp para poner la opcion correcta en un lugar aleatorio y las demas con numeros aleatorios
 	for (i = 0; i < 3; i++)
 	{
 		if (i == randPosOp)
@@ -1006,6 +1114,7 @@ bool menu::OpMenu(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, Card* prevca
 			x = evento.mouse.x;
 			y = evento.mouse.y;
 		}
+		al_draw_bitmap(bg, 0, 0, 0);
 
 		//Operacion segun el color de la carta del medio
 		if (prevcard->color == 1)
@@ -1042,15 +1151,15 @@ bool menu::OpMenu(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, Card* prevca
 		}
 
 
-		al_draw_bitmap(bg, 0, 0, 0);
 
 		al_draw_bitmap(prevcard->asset_card, 360, 250, 0);
 		al_draw_bitmap(ChoosenCard->asset_card, 810, 250, 0);
-
+		//Transforma y dibuja los numeros del vector Opciones
 		al_draw_text(mine_font, al_map_rgb(0, 0, 0), 240, 560, ALLEGRO_ALIGN_CENTER, to_string(Opciones[0]).c_str());
 		al_draw_text(mine_font, al_map_rgb(0, 0, 0), 660, 560, ALLEGRO_ALIGN_CENTER, to_string(Opciones[1]).c_str());
 		al_draw_text(mine_font, al_map_rgb(0, 0, 0), 1050, 560, ALLEGRO_ALIGN_CENTER, to_string(Opciones[2]).c_str());
 		
+		//Entra solo si el turno del jugador 1 es verdadero.
 		if (Jugador::GetJugador1().turn == true)
 		{
 			al_draw_text(mine_font, al_map_rgb(250, 250, 250), 515, 145, NULL, "Tu turno!");
@@ -1097,7 +1206,7 @@ bool menu::OpMenu(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, Card* prevca
 			{
 				if (evento.mouse.button & 1)
 				{
-					if (Opciones[3] == Ans)
+					if (Opciones[2] == Ans)
 					{
 						al_draw_text(mine_font, al_map_rgb(0, 0, 0), 640, 405, NULL, "Correcto!");
 						Sleep(1000);
@@ -1112,22 +1221,34 @@ bool menu::OpMenu(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, Card* prevca
 				}
 			}
 		}
-		else
+		//Entra solo si el turno del jugador 2, 3 o 4 es verdadero.
+		else if (Jugador::GetJugador2().turn == true || Jugador::GetJugador3().turn == true || Jugador::GetJugador4().turn == true)
 		{
+			// la variable volado es para aumentar las probabilidades de que el bot pueda acertar en las opciones un 50%
+			// la variable AnsBot es para que, en caso de que el volado salga 0 este eliga un numero del vector opciones
+			int volado = rand() % 2, AnsBot = rand() % 3;
 			al_draw_text(mine_font, al_map_rgb(250, 250, 250), 515, 145, NULL, "Turno del bot!");
-			if (Opciones[rand() % 3] == Ans)
+			if (volado == 0)
 			{
-				Sleep(1000);
-				return true;
+				if (Opciones[AnsBot] == Ans)
+				{
+					cout << "Correcto!" << endl;
+					return true;
+				}
+				else if (Opciones[AnsBot] != Ans)
+				{
+					cout << "Incorrecto!" << endl;
+					return false;
+				}
 			}
 			else
 			{
-				Sleep(1000);
-				return false;
+				return true;
 			}
 
 		}
 		
+		al_flip_display();
 	}
 }
 
@@ -1174,7 +1295,7 @@ int menu::Operaciones(Card* midcard, Card* ChoosenCard, int randOp)
 	}
 }
 
-int menu::GameOverMenu(ALLEGRO_EVENT evento, ALLEGRO_EVENT_QUEUE* queue, int qcards)
+int menu::GameOverMenu(ALLEGRO_EVENT_QUEUE* queue, int qcards)
 {
 	printf("Se a acabado el juego!");
 	int x = -1, y = -1;
